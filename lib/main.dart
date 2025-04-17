@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mindcare/presentation/pages/home/home_page.dart';
+import 'package:mindcare/presentation/pages/mood_detector/mood_detecter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,6 +15,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+
       theme: ThemeData(
         // This is the theme of your application.
         //

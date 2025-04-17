@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mindcare/presentation/pages/mood_detector/mood_detecter.dart';
 
 class HomePage extends StatelessWidget {
   final String userName = "Nimantha"; // You can fetch this from user data
@@ -10,7 +11,15 @@ class HomePage extends StatelessWidget {
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.black,
-        onPressed: () {},
+        onPressed: () {
+          // navigation to mood detector page
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FaceDetectionScreen(),
+            ),
+          );
+        },
         child: Icon(Icons.emoji_emotions, color: Colors.white),
       ),
       body: SafeArea(
@@ -144,7 +153,6 @@ class HomePage extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        
         onTap: onTap,
         borderRadius: BorderRadius.circular(28),
         splashColor: Colors.grey.withOpacity(0.3),
