@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mindcare/presentation/pages/chatbot/happy_bot_page.dart';
+import 'package:mindcare/presentation/pages/home/widgets/home_card.dart';
 import 'package:mindcare/presentation/pages/mood_detector/mood_detecter.dart';
 
 class HomePage extends StatelessWidget {
-  final String userName = "Nimantha"; // You can fetch this from user data
+  final String userName = "Nimantha"; // Replace with dynamic user data
 
   @override
   Widget build(BuildContext context) {
@@ -12,15 +14,12 @@ class HomePage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.black,
         onPressed: () {
-          // navigation to mood detector page
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => FaceDetectionScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => FaceDetectionScreen()),
           );
         },
-        child: Icon(Icons.emoji_emotions, color: Colors.white),
+        child: const Icon(Icons.emoji_emotions, color: Colors.white),
       ),
       body: SafeArea(
         child: Padding(
@@ -28,109 +27,11 @@ class HomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Settings icon
-              // Updated settings button with tap effect
-              Align(
-                alignment: Alignment.topRight,
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      // Handle settings tap
-                      // You can navigate to settings page or show a modal here
-                    },
-                    borderRadius:
-                        BorderRadius.circular(20), // Circular shape for ripple
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.all(8),
-                        child:
-                            Icon(Icons.settings_outlined, color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              // Greeting - Made larger and bolder
-              Text(
-                'Hello Good Morning,',
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              Text(
-                userName,
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 50),
-              // Menu Cards - Styled with more rounded corners and click effects
-              _buildClickableCard(
-                context,
-                leftIcon: Icons.arrow_forward,
-                label: "Relax My Mind",
-                rightImageAsset: 'assets/icons/mindfulness1.png',
-                leftBackgroundColor: Color(0xFF0057B2),
-                onTap: () {
-                  // Handle Relax My Mind tap
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Opening Relax My Mind')),
-                  );
-                },
-              ),
-              SizedBox(height: 16),
-              _buildClickableCard(
-                context,
-                leftImageAsset: 'assets/icons/stress_level.png',
-                label: "Stress Level",
-                rightIcon: Icons.music_note,
-                rightBackgroundColor: Color(0xFF008450),
-                onTap: () {
-                  // Handle Stress Level tap
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Opening Stress Level')),
-                  );
-                },
-              ),
-              SizedBox(height: 16),
-              _buildClickableCard(
-                context,
-                leftText: "Ask",
-                label: "Happy Bot",
-                rightImageAsset: 'assets/icons/Bot1.png',
-                leftBackgroundColor: Color(0xFF0057B2),
-                onTap: () {
-                  // Handle Happy Bot tap
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Opening Happy Bot')),
-                  );
-                },
-              ),
-              SizedBox(height: 16),
-              _buildClickableCard(
-                context,
-                leftImageAsset: 'assets/icons/Extra1.png',
-                label: "Extras",
-                rightIcon: Icons.arrow_forward,
-                rightBackgroundColor: Color(0xFF008450),
-                onTap: () {
-                  // Handle Extras tap
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Opening Extras')),
-                  );
-                },
-              ),
+              _buildSettingsButton(context),
+              const SizedBox(height: 20),
+              _buildGreeting(),
+              const SizedBox(height: 50),
+              _buildCardList(context),
             ],
           ),
         ),
@@ -138,100 +39,25 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildClickableCard(
-    BuildContext context, {
-    IconData? leftIcon,
-    String? leftText,
-    required String label,
-    IconData? rightIcon,
-    String? leftImageAsset,
-    String? rightImageAsset,
-    Color leftBackgroundColor = Colors.grey,
-    Color rightBackgroundColor = Colors.grey,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(28),
-        splashColor: Colors.grey.withOpacity(0.3),
-        highlightColor: Colors.grey.withOpacity(0.1),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-            border: Border.all(color: Colors.grey.shade200, width: 1),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                // Left Circle
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: leftIcon != null || leftText != null
-                        ? leftBackgroundColor
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Center(
-                    child: leftIcon != null
-                        ? Icon(leftIcon, color: Colors.white, size: 24)
-                        : leftText != null
-                            ? Text(
-                                leftText,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              )
-                            : leftImageAsset != null
-                                ? Image.asset(leftImageAsset, height: 52)
-                                : null,
-                  ),
-                ),
-                SizedBox(width: 16),
-                // Label
-                Expanded(
-                  child: Text(
-                    label,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                // Right Circle
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: rightIcon != null
-                        ? rightBackgroundColor
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Center(
-                    child: rightIcon != null
-                        ? Icon(rightIcon, color: Colors.white, size: 24)
-                        : rightImageAsset != null
-                            ? Image.asset(rightImageAsset, height: 52)
-                            : null,
-                  ),
-                ),
-              ],
+  Widget _buildSettingsButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            // Navigate to settings or show modal
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(8),
+              child: Icon(Icons.settings_outlined, color: Colors.grey),
             ),
           ),
         ),
@@ -239,95 +65,72 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Original _buildCard method preserved for reference
-  Widget _buildCard(
-    BuildContext context, {
-    IconData? leftIcon,
-    String? leftText,
-    required String label,
-    IconData? rightIcon,
-    String? leftImageAsset,
-    String? rightImageAsset,
-    Color leftBackgroundColor = Colors.grey,
-    Color rightBackgroundColor = Colors.grey,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: Offset(0, 4),
+  Widget _buildGreeting() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Hello Good Morning,',
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
-        ],
-        border: Border.all(color: Colors.grey.shade200, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            // Left Circle
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: leftIcon != null || leftText != null
-                    ? leftBackgroundColor
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Center(
-                child: leftIcon != null
-                    ? Icon(leftIcon, color: Colors.white, size: 24)
-                    : leftText != null
-                        ? Text(
-                            leftText,
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          )
-                        : leftImageAsset != null
-                            ? Image.asset(leftImageAsset, height: 28)
-                            : null,
-              ),
-            ),
-            SizedBox(width: 16),
-            // Label
-            Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-            // Right Circle
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: rightIcon != null
-                    ? rightBackgroundColor
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Center(
-                child: rightIcon != null
-                    ? Icon(rightIcon, color: Colors.white, size: 24)
-                    : rightImageAsset != null
-                        ? Image.asset(rightImageAsset, height: 32)
-                        : null,
-              ),
-            ),
-          ],
         ),
-      ),
+        Text(
+          userName,
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
+  }
+
+  Widget _buildCardList(BuildContext context) {
+    return Column(
+      children: [
+        HomeCardButton(
+          label: "Relax My Mind",
+          leftIcon: Icons.arrow_forward_ios,
+          rightImageAsset: 'assets/icons/mindfulness1.png',
+          leftBackgroundColor: const Color(0xFF0057B2),
+          onTap: () => _showSnack(context, "Opening Relax My Mind"),
+        ),
+        const SizedBox(height: 16),
+        HomeCardButton(
+          label: "Stress Level",
+          leftImageAsset: 'assets/icons/stress_level.png',
+          rightIcon: Icons.analytics,
+          rightBackgroundColor: const Color(0xFF008450),
+          onTap: () => _showSnack(context, "Opening Stress Level"),
+        ),
+        const SizedBox(height: 16),
+        HomeCardButton(
+          label: "Happy Bot",
+          leftText: "Ask",
+          rightImageAsset: 'assets/icons/Bot1.png',
+          leftBackgroundColor: const Color(0xFF0057B2),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => HappyBotPage()),
+          ),
+        ),
+        const SizedBox(height: 16),
+        HomeCardButton(
+          label: "Extras",
+          leftImageAsset: 'assets/icons/Extra1.png',
+          rightIcon: Icons.arrow_forward,
+          rightBackgroundColor: const Color(0xFF008450),
+          onTap: () => _showSnack(context, "Opening Extras"),
+        ),
+      ],
+    );
+  }
+
+  void _showSnack(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }
