@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../../domain/models/message.dart';
 
@@ -15,11 +16,12 @@ Use a warm, caring tone in all communications.
 Format important advice or takeaways with markdown for clarity.
 Respond in the same language the user writes in.
 ''';
-  
-  // Replace with your actual API key
-  static const String _apiKey = 'AIzaSyDy8cctoZxEmnDhUpJ_-60I0HBT7RNRpdI';
 
-  GeminiService() 
+  // Replace with your actual API key
+  static final String _apiKey = dotenv.env['GEMINAI_API_KEY']!;
+  // static const String _apiKey = ;
+
+  GeminiService()
       : _model = GenerativeModel(
           model: 'gemini-1.5-pro',
           apiKey: _apiKey,
@@ -29,20 +31,18 @@ Respond in the same language the user writes in.
     try {
       // Create content with the default prompt
       final systemContent = Content.text(_defaultPrompt);
-      
+
       // Create content with the user's message
       final userMessage = chatHistory.last.text;
       final userContent = Content.text(userMessage);
-      
+
       // Create a combined prompt with both system instructions and user message
       final combinedPrompt = "$_defaultPrompt\n\nUser: $userMessage";
-      
-      
+
       // Generate content using the model
-      final response = await _model.generateContent(
-        [Content.text(combinedPrompt)]
-      );
-      
+      final response =
+          await _model.generateContent([Content.text(combinedPrompt)]);
+
       // Extract the text from the response
       return response.text ?? "I'm sorry, I couldn't generate a response.";
     } catch (e) {
