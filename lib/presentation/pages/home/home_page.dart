@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mindcare/presentation/pages/chatbot/happy_bot_page.dart';
 import 'package:mindcare/presentation/pages/home/widgets/home_card.dart';
 import 'package:mindcare/presentation/pages/mood_detector/mood_detecter.dart';
+import 'package:mindcare/presentation/pages/relax_musics/relax_musics_page.dart';
 
 class HomePage extends StatelessWidget {
   final String userName = "Nimantha"; // Replace with dynamic user data
@@ -97,7 +98,10 @@ class HomePage extends StatelessWidget {
           leftIcon: Icons.arrow_forward_ios,
           rightImageAsset: 'assets/icons/mindfulness1.png',
           leftBackgroundColor: const Color(0xFF0057B2),
-          onTap: () => _showSnack(context, "Opening Relax My Mind"),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => RelaxMusicsPage()),
+          ),
         ),
         const SizedBox(height: 16),
         HomeCardButton(
