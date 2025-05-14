@@ -109,7 +109,10 @@ class HomePage extends StatelessWidget {
           leftImageAsset: 'assets/icons/stress_level.png',
           rightIcon: Icons.analytics,
           rightBackgroundColor: const Color(0xFF008450),
-          onTap: () => _showSnack(context, "Opening Stress Level"),
+           onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => RelaxMusicsPage()),
+          ),
         ),
         const SizedBox(height: 16),
         HomeCardButton(

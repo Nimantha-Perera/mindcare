@@ -45,6 +45,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   dartz: ^0.10.1
   flutter_bloc: ^9.1.0
+  just_audio: ^0.9.46
 
 dev_dependencies:
   flutter_test:
