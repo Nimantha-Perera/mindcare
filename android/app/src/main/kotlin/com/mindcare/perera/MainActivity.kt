@@ -1,4 +1,4 @@
-package com.example.mindcare
+package com.mindcare.perera
 
 import io.flutter.embedding.android.FlutterActivity
 

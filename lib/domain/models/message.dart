@@ -1,5 +1,5 @@
 class Message {
-  final String text;
+  late final String text;
   final bool isFromUser;
   final String? senderName;
 

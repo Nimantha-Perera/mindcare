@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "816818496236",
+    "project_id": "mindcare-e9b55",
+    "storage_bucket": "mindcare-e9b55.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:816818496236:android:ffdff34cc830a569fdfbc9",
+        "android_client_info": {
+          "package_name": "com.mindcare.perera"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEYuiSNhYI15fMErZNxxAtX4ninoyFBbo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

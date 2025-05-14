@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mindcare/domain/models/message.dart';
 import 'package:mindcare/domain/service/gemini_service.dart';
@@ -8,6 +9,7 @@ class ChatViewModel extends ChangeNotifier {
   bool _isLoading = false;
   final String _botName = "Happy Bot";
   final GeminiService _geminiService = GeminiService();
+   final User? user = FirebaseAuth.instance.currentUser;
 
   List<Message> get messages => _messages;
   bool get isLoading => _isLoading;
@@ -17,9 +19,11 @@ class ChatViewModel extends ChangeNotifier {
     // Initialize with sample messages from the image
     _messages = [
       Message(text: "Hi I need help", isFromUser: true),
-      Message(text: "Hello Nimantha\nhow can i help you today", isFromUser: false, senderName: "Bot"),
+      Message(text: "Hello ${user?.displayName ?? 'User'},\nhow can i help you today", isFromUser: false, senderName: "Bot"),
     ];
   }
+
+  get isTyping => null;
 
   Future<void> sendMessage(String text) async {
     if (text.trim().isEmpty) return;
