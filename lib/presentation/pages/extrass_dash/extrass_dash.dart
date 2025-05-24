@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mindcare/presentation/pages/home/widgets/home_card.dart';
+import 'package:mindcare/presentation/pages/sos/sos_page.dart';
 
 class ExtrasDashboard extends StatelessWidget {
   const ExtrasDashboard({Key? key}) : super(key: key);
@@ -121,7 +122,10 @@ class ExtrasDashboard extends StatelessWidget {
           rightIcon: Icons.check_circle_outline,
           rightBackgroundColor: const Color.fromARGB(255, 163, 19, 0),
           onTap: () => {
-            _showSnack(context, "Goal Tracker Coming Soon!"),
+           Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => SOSPage()),
+            ),
           }
         ),
         const SizedBox(height: 20),

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mindcare/presentation/pages/authentications/login.dart';
 import 'package:mindcare/presentation/pages/setting/SettingItem.dart';
 
@@ -7,70 +8,122 @@ class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   void _handleLogout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-    );
+    // Show confirmation dialog
+    final bool confirm = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout Confirmation'),
+        content: const Text('Are you sure you want to logout?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Logout', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    ) ?? false;
+
+    if (confirm) {
+      await FirebaseAuth.instance.signOut();
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
-    final theme = Theme.of(context);
+    
+    // Set system UI overlay style for full immersive experience
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
 
     return Scaffold(
-      body: SafeArea(
-        child: user == null
-            ? const Center(child: Text('No user info available.'))
-            : Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.teal.shade50,
-                      Colors.white,
-                    ],
-                  ),
+      extendBodyBehindAppBar: true, // Makes content go behind app bar area
+      backgroundColor: Colors.teal.shade50,
+      body: user == null
+          ? const Center(child: Text('No user info available.'))
+          : Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.teal.shade100,
+                    Colors.teal.shade50,
+                    Colors.white,
+                  ],
+                  stops: const [0.0, 0.3, 1.0],
                 ),
+              ),
+              child: SafeArea(
                 child: Column(
                   children: [
-                    // Custom header with back button
+                    // Top header section
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           InkWell(
                             onTap: () => Navigator.of(context).pop(),
                             child: Container(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(10.0),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(14),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withOpacity(0.08),
                                     blurRadius: 10,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
-                              child: const Icon(Icons.arrow_back_ios_new, color: Colors.teal),
+                              child: const Icon(Icons.arrow_back_ios_new, color: Colors.teal, size: 18),
                             ),
                           ),
-                          const Expanded(
-                            child: Center(
-                              child: Text(
-                                'Profile Settings',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.teal,
+                          const Text(
+                            'Profile Settings',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal,
+                            ),
+                          ),
+                          // Settings action button
+                          Container(
+                            padding: const EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
                                 ),
-                              ),
+                              ],
                             ),
+                            child: const Icon(Icons.more_vert, color: Colors.teal, size: 18),
                           ),
-                          const SizedBox(width: 40), // Balance the header
                         ],
                       ),
                     ),
@@ -82,44 +135,76 @@ class SettingsScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 24.0),
                           child: Column(
                             children: [
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 20),
                               
-                              // Profile Picture with decorative border
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    colors: [Colors.teal.shade300, Colors.teal.shade700],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                ),
-                                child: user.photoURL != null
-                                  ? CircleAvatar(
-                                      radius: 50,
-                                      backgroundColor: Colors.white,
-                                      backgroundImage: NetworkImage(user.photoURL!),
-                                    )
-                                  : const CircleAvatar(
-                                      radius: 50,
-                                      backgroundColor: Colors.white,
-                                      child: Icon(Icons.person, size: 50, color: Colors.teal),
+                              // Profile Picture with enhanced decorative border
+                              Stack(
+                                alignment: Alignment.bottomRight,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [Colors.teal.shade300, Colors.teal.shade700],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.teal.withOpacity(0.3),
+                                          blurRadius: 15,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
                                     ),
+                                    child: user.photoURL != null
+                                      ? CircleAvatar(
+                                          radius: 60,
+                                          backgroundColor: Colors.white,
+                                          backgroundImage: NetworkImage(user.photoURL!),
+                                        )
+                                      : CircleAvatar(
+                                          radius: 60,
+                                          backgroundColor: Colors.white,
+                                          child: Icon(Icons.person, size: 60, color: Colors.teal.shade300),
+                                        ),
+                                  ),
+                                  // Edit profile picture button
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.teal,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt_outlined,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
                               
                               const SizedBox(height: 24),
                               
-                              // User Info Card
+                              // User Info Card - Enhanced
                               Container(
-                                padding: const EdgeInsets.all(20),
+                                padding: const EdgeInsets.all(24),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(24),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 15,
+                                      blurRadius: 20,
                                       offset: const Offset(0, 5),
                                     ),
                                   ],
@@ -129,7 +214,7 @@ class SettingsScreen extends StatelessWidget {
                                     Text(
                                       user.displayName ?? 'No Name',
                                       style: const TextStyle(
-                                        fontSize: 22, 
+                                        fontSize: 24, 
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -137,8 +222,8 @@ class SettingsScreen extends StatelessWidget {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.email_outlined, size: 16, color: Colors.grey),
-                                        const SizedBox(width: 6),
+                                        const Icon(Icons.email_outlined, size: 18, color: Colors.grey),
+                                        const SizedBox(width: 8),
                                         Text(
                                           user.email ?? 'No Email',
                                           style: const TextStyle(
@@ -148,62 +233,120 @@ class SettingsScreen extends StatelessWidget {
                                         ),
                                       ],
                                     ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.teal.shade50,
+                                        foregroundColor: Colors.teal,
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: const Text('Edit Profile'),
+                                    ),
                                   ],
                                 ),
                               ),
                               
                               const SizedBox(height: 30),
                               
-                              // Settings Options
-                              SettingItem(
+                              // Section Title
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 12.0, bottom: 12.0),
+                                  child: Text(
+                                    'Account Settings',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.teal.shade800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              
+                              // Settings Options - Enhanced with description
+                              _buildSettingItemWithDescription(
                                 icon: Icons.notifications_outlined,
                                 title: 'Notifications',
+                                description: 'Manage your app notifications',
                                 onTap: () {},
                               ),
                               
-                              SettingItem(
+                              _buildSettingItemWithDescription(
                                 icon: Icons.privacy_tip_outlined,
                                 title: 'Privacy',
+                                description: 'Control your privacy settings',
                                 onTap: () {},
                               ),
                               
-                              SettingItem(
+                              _buildSettingItemWithDescription(
                                 icon: Icons.security_outlined,
                                 title: 'Security',
+                                description: 'Password and account protection',
                                 onTap: () {},
                               ),
                               
-                              SettingItem(
+                              // Section Title
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 12.0, top: 20.0, bottom: 12.0),
+                                  child: Text(
+                                    'Support',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.teal.shade800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              
+                              _buildSettingItemWithDescription(
                                 icon: Icons.help_outline,
                                 title: 'Help & Support',
+                                description: 'Get help or contact support',
+                                onTap: () {},
+                              ),
+                              
+                              _buildSettingItemWithDescription(
+                                icon: Icons.info_outline,
+                                title: 'About',
+                                description: 'Learn more about our app',
                                 onTap: () {},
                               ),
                               
                               const SizedBox(height: 40),
                               
-                              // Logout Button
+                              // Logout Button - Enhanced with larger touch area
                               ElevatedButton.icon(
                                 onPressed: () => _handleLogout(context),
-                                icon: const Icon(Icons.logout, color: Colors.white),
+                                icon: const Icon(Icons.logout, color: Colors.white, size: 22),
                                 label: const Text(
                                   'Logout',
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.redAccent,
-                                  minimumSize: const Size(double.infinity, 55),
+                                  minimumSize: const Size(double.infinity, 60),
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(18),
                                   ),
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
                                 ),
                               ),
                               
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 40),
                             ],
                           ),
                         ),
@@ -212,6 +355,80 @@ class SettingsScreen extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+    );
+  }
+  
+  // Helper method to create setting item with description
+  Widget _buildSettingItemWithDescription({
+    required IconData icon,
+    required String title,
+    required String description,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.teal.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: Colors.teal, size: 22),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.grey,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
