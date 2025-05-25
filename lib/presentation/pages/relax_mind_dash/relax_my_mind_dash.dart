@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mindcare/presentation/pages/breathing/breathing.dart';
 import 'package:mindcare/presentation/pages/home/widgets/home_card.dart';
 
 import '../relax_musics/relax_musics_page.dart';
@@ -113,7 +114,9 @@ class RelaxMyMindDashboard extends StatelessWidget {
           rightImageAsset: 'assets/icons/mindfulness1.png',
           leftBackgroundColor: const Color(0xFF0057B2),
           onTap: () => {
-            _showSnack(context, "Breathing Tips Coming Soon!"),
+             Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => MeditationGuide()),),
           }
         ),
         const SizedBox(height: 20),
