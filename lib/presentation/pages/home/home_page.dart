@@ -8,6 +8,7 @@ import 'package:mindcare/presentation/pages/mood_detector/mood_detecter.dart';
 import 'package:mindcare/presentation/pages/relax_mind_dash/relax_my_mind_dash.dart';
 import 'package:mindcare/presentation/pages/relax_musics/relax_musics_page.dart';
 import 'package:mindcare/presentation/pages/setting/settings.dart';
+import 'package:mindcare/presentation/pages/stress_level/screens/stress_level_quiz.dart';
 
 class HomePage extends StatelessWidget {
 
@@ -140,7 +141,10 @@ class HomePage extends StatelessWidget {
             rightIcon: Icons.analytics,
             rightBackgroundColor: const Color(0xFF008450),
             onTap: () => {
-              _showSnack(context, "Stress Level Detection Coming Soon!"),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => StressLevelQuiz()),
+              ),
             },
           ),
         ),

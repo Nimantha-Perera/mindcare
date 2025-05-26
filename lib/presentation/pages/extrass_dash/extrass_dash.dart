@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mindcare/presentation/pages/docter_channel/docter_channel.dart';
 import 'package:mindcare/presentation/pages/home/widgets/home_card.dart';
 import 'package:mindcare/presentation/pages/sos/sos_page.dart';
 
@@ -112,7 +113,10 @@ class ExtrasDashboard extends StatelessWidget {
           rightImageAsset: 'assets/icons/mindfulness1.png',
           leftBackgroundColor: const Color(0xFF2E7D32),
           onTap: () => {
-            _showSnack(context, "Motivation Quotes Coming Soon!"),
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const DoctorChannelScreen()),
+            ),
           }
         ),
         const SizedBox(height: 20),
