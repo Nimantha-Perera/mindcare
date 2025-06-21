@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mindcare/firebase_options.dart';
 import 'package:mindcare/presentation/pages/authentications/login.dart';
+import 'package:mindcare/presentation/pages/docter_channel/injection_container.dart' as di;
 import 'package:mindcare/presentation/pages/home/home_page.dart';
 import 'package:mindcare/presentation/pages/mood_detector/mood_detecter.dart';
 import 'package:mindcare/presentation/pages/relax_musics/bloc/music/music_bloc.dart';
@@ -11,7 +12,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
+   await di.init();
+    await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await dotenv.load(fileName: ".env");

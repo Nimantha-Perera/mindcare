@@ -64,26 +64,41 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
         _nameController.clear();
         _phoneController.clear();
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${_nameController.text} added to emergency contacts')),
+      );
     }
   }
 
   void _sendSOSMessage() async {
     if (_emergencyContacts.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add emergency contacts first')),
+        const SnackBar(
+          content: Text('Please add emergency contacts first'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
 
     final String message = 
-        "EMERGENCY: I need help right now. This is an automated SOS message from my MindCare app.";
+        "🆘 EMERGENCY: I need help right now. This is an automated SOS message from my MindCare app. Please contact me immediately.";
     
     try {
       await Share.share(message, subject: 'EMERGENCY SOS ALERT');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('SOS message sent successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error sending SOS: $e')),
+          SnackBar(
+            content: Text('Error sending SOS: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -155,7 +170,9 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
           ),
         ),
         child: SafeArea(
-          child: isLandscape ? _buildLandscapeLayout(screenWidth, screenHeight) : _buildPortraitLayout(screenWidth, screenHeight),
+          child: isLandscape 
+              ? _buildLandscapeLayout(screenWidth, screenHeight) 
+              : _buildPortraitLayout(screenWidth, screenHeight),
         ),
       ),
     );
@@ -165,7 +182,6 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
     // Calculate responsive dimensions
     final sosButtonSize = screenWidth < 400 ? screenWidth * 0.4 : 180.0;
     final innerButtonSize = sosButtonSize * 0.9;
-    final double fontSize = screenWidth < 360 ? 16.0 : 18.0;
 
     return Column(
       children: [
@@ -233,7 +249,7 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
         SizedBox(height: screenHeight * 0.03),
         
         Expanded(
-          child: _buildContactsContainer(fontSize, screenWidth),
+          child: _buildContactsContainer(screenWidth),
         ),
       ],
     );
@@ -243,7 +259,6 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
     // Landscape-specific responsive values
     final sosButtonSize = screenHeight * 0.35;
     final innerButtonSize = sosButtonSize * 0.9;
-    final double fontSize = 16.0;
 
     return Row(
       children: [
@@ -313,17 +328,19 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
         
         // Right side with contacts
         Expanded(
-          child: _buildContactsContainer(fontSize, screenWidth),
+          child: _buildContactsContainer(screenWidth),
         ),
       ],
     );
   }
 
-  Widget _buildContactsContainer(double fontSize, double screenWidth) {
+  Widget _buildContactsContainer(double screenWidth) {
     final bool isSmallScreen = screenWidth < 360;
+    final double fontSize = isSmallScreen ? 16.0 : 18.0;
 
     return Container(
       width: double.infinity,
+      height: double.infinity, // Use all available space
       padding: EdgeInsets.all(isSmallScreen ? 12 : 20),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -334,16 +351,21 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min, // Important: don't take more space than needed
         children: [
+          // Header row - fixed at top
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Emergency Contacts',
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              Flexible(
+                child: Text(
+                  'Emergency Contacts',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               IconButton(
@@ -353,99 +375,207 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
                     _isAddingContact = true;
                   });
                 },
+                tooltip: 'Add Emergency Contact',
               ),
             ],
           ),
           
-          SizedBox(height: isSmallScreen ? 10 : 15),
+          SizedBox(height: isSmallScreen ? 8 : 12),
           
-          // if (_isAddingContact)
-          //   _buildAddContactForm(isSmallScreen),
-          
-          // Expanded(
-          //   child: _emergencyContacts.isEmpty
-          //       ? Center(
-          //           child: Text(
-          //             'No emergency contacts added yet.\nTap the + button to add contacts.',
-          //             textAlign: TextAlign.center,
-          //             style: TextStyle(
-          //               color: Colors.grey,
-          //               fontSize: isSmallScreen ? 14 : 16,
-          //             ),
-          //           ),
-          //         )
-          //       : ListView.builder(
-          //           itemCount: _emergencyContacts.length,
-          //           itemBuilder: (context, index) {
-          //             final contact = _emergencyContacts[index];
-          //             final parts = contact.split(': ');
-          //             final name = parts[0];
-          //             final phone = parts.length > 1 ? parts[1] : '';
-                      
-          //             return Dismissible(
-          //               key: Key(contact),
-          //               background: Container(
-          //                 color: Colors.red.shade100,
-          //                 alignment: Alignment.centerRight,
-          //                 padding: const EdgeInsets.only(right: 20),
-          //                 child: const Icon(Icons.delete, color: Colors.red),
-          //               ),
-          //               direction: DismissDirection.endToStart,
-          //               onDismissed: (direction) {
-          //                 setState(() {
-          //                   _emergencyContacts.removeAt(index);
-          //                 });
-          //               },
-          //               child: _buildContactCard(name, phone, isSmallScreen),
-          //             );
-          //           },
-          //         ),
-          // ),
-          
-          SizedBox(height: isSmallScreen ? 10 : 15),
-          
-          _buildHelplineSection(isSmallScreen),
+          // Scrollable content area
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Add contact form (if showing)
+                  if (_isAddingContact) ...[
+                    _buildAddContactForm(isSmallScreen),
+                    SizedBox(height: isSmallScreen ? 12 : 16),
+                  ],
+                  
+                  // Emergency contacts list
+                  if (_emergencyContacts.isNotEmpty) ...[
+                    Text(
+                      'Your Contacts',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 14 : 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    SizedBox(height: isSmallScreen ? 8 : 12),
+                    ...List.generate(
+                      _emergencyContacts.length,
+                      (index) {
+                        final contact = _emergencyContacts[index];
+                        final parts = contact.split(': ');
+                        final name = parts[0];
+                        final phone = parts.length > 1 ? parts[1] : '';
+                        
+                        return Dismissible(
+                          key: Key(contact),
+                          background: Container(
+                            margin: EdgeInsets.only(bottom: isSmallScreen ? 8 : 12),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade100,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            child: const Icon(Icons.delete, color: Colors.red),
+                          ),
+                          direction: DismissDirection.endToStart,
+                          onDismissed: (direction) {
+                            setState(() {
+                              _emergencyContacts.removeAt(index);
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('$name removed from contacts')),
+                            );
+                          },
+                          child: _buildContactCard(name, phone, isSmallScreen),
+                        );
+                      },
+                    ),
+                    SizedBox(height: isSmallScreen ? 16 : 24),
+                  ],
+                  
+                  // Empty state message
+                  if (_emergencyContacts.isEmpty && !_isAddingContact)
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        vertical: isSmallScreen ? 20 : 32,
+                        horizontal: isSmallScreen ? 16 : 24,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.person_add_outlined,
+                            size: isSmallScreen ? 48 : 64,
+                            color: Colors.grey.shade400,
+                          ),
+                          SizedBox(height: isSmallScreen ? 8 : 12),
+                          Text(
+                            'No emergency contacts added yet',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: isSmallScreen ? 14 : 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: isSmallScreen ? 4 : 8),
+                          Text(
+                            'Tap the + button above to add trusted contacts',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: isSmallScreen ? 12 : 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  
+                  if (_emergencyContacts.isEmpty && !_isAddingContact)
+                    SizedBox(height: isSmallScreen ? 16 : 24),
+                  
+                  // Crisis helplines section
+                  _buildHelplineSection(isSmallScreen),
+                  
+                  // Bottom padding for scroll
+                  SizedBox(height: isSmallScreen ? 16 : 24),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildContactCard(String name, String phone, bool isSmallScreen) {
-    return Card(
+    return Container(
       margin: EdgeInsets.only(bottom: isSmallScreen ? 8 : 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: isSmallScreen ? 12 : 16, 
-          vertical: isSmallScreen ? 4 : 8
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.red.shade50,
-            shape: BoxShape.circle,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _makeCall(phone.replaceAll('-', '')),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 12 : 16, 
+              vertical: isSmallScreen ? 12 : 16
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(isSmallScreen ? 8 : 10),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.person, 
+                    color: Colors.red.shade400, 
+                    size: isSmallScreen ? 18 : 24
+                  ),
+                ),
+                SizedBox(width: isSmallScreen ? 10 : 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: isSmallScreen ? 14 : 16,
+                          color: Colors.black87,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        phone,
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 12 : 14,
+                          color: Colors.grey.shade600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.call, 
+                      color: Colors.green.shade600, 
+                      size: isSmallScreen ? 20 : 24
+                    ),
+                    onPressed: () => _makeCall(phone.replaceAll('-', '')),
+                    tooltip: 'Call $name',
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Icon(Icons.person, color: Colors.red.shade400, size: isSmallScreen ? 18 : 24),
-        ),
-        title: Text(
-          name,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: isSmallScreen ? 14 : 16,
-          ),
-        ),
-        subtitle: Text(
-          phone,
-          style: TextStyle(
-            fontSize: isSmallScreen ? 12 : 14,
-          ),
-        ),
-        trailing: IconButton(
-          icon: Icon(Icons.call, color: Colors.green.shade600, size: isSmallScreen ? 20 : 24),
-          onPressed: () => _makeCall(phone.replaceAll('-', '')),
         ),
       ),
     );
@@ -453,7 +583,6 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
 
   Widget _buildAddContactForm(bool isSmallScreen) {
     return Card(
-      margin: EdgeInsets.only(bottom: isSmallScreen ? 10 : 15),
       elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -462,40 +591,60 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
         padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Add Emergency Contact',
               style: TextStyle(
                 fontSize: isSmallScreen ? 14 : 16,
                 fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
             ),
-            SizedBox(height: isSmallScreen ? 10 : 15),
+            SizedBox(height: isSmallScreen ? 12 : 16),
+            
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
                 labelText: 'Name',
-                border: const OutlineInputBorder(),
+                hintText: 'Enter contact name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.person_outline),
-                contentPadding: isSmallScreen ? 
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 12) : 
-                    null,
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: isSmallScreen ? 10 : 14, 
+                  horizontal: 12
+                ),
+                isDense: isSmallScreen,
               ),
+              textInputAction: TextInputAction.next,
             ),
-            SizedBox(height: isSmallScreen ? 8 : 10),
+            
+            SizedBox(height: isSmallScreen ? 10 : 12),
+            
             TextField(
               controller: _phoneController,
               decoration: InputDecoration(
                 labelText: 'Phone Number',
-                border: const OutlineInputBorder(),
+                hintText: 'Enter phone number',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.phone_outlined),
-                contentPadding: isSmallScreen ? 
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 12) : 
-                    null,
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: isSmallScreen ? 10 : 14, 
+                  horizontal: 12
+                ),
+                isDense: isSmallScreen,
               ),
               keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _addEmergencyContact(),
             ),
-            SizedBox(height: isSmallScreen ? 10 : 15),
+            
+            SizedBox(height: isSmallScreen ? 12 : 16),
+            
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -507,14 +656,29 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
                       _phoneController.clear();
                     });
                   },
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 16,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                  ),
                   child: const Text('Cancel'),
                 ),
-                SizedBox(width: isSmallScreen ? 5 : 10),
+                
+                SizedBox(width: isSmallScreen ? 8 : 12),
+                
                 ElevatedButton(
                   onPressed: _addEmergencyContact,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red.shade400,
                     foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 16,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: const Text('Save Contact'),
                 ),
@@ -528,6 +692,7 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
 
   Widget _buildHelplineSection(bool isSmallScreen) {
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
       decoration: BoxDecoration(
         color: Colors.red.shade50,
@@ -535,82 +700,211 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Crisis Helplines',
+            'Emergency Helplines - Sri Lanka',
             style: TextStyle(
               fontSize: isSmallScreen ? 16 : 18,
               fontWeight: FontWeight.bold,
               color: Colors.red,
             ),
           ),
-          SizedBox(height: isSmallScreen ? 8 : 10),
+          SizedBox(height: isSmallScreen ? 12 : 16),
+          
+          // Mental Health Helpline - Most important for this app
           _buildHelplineItem(
-            'National Suicide Prevention Lifeline',
-            '988',
-            Icons.support_agent,
+            'National Mental Health Helpline',
+            '1926',
+            Icons.psychology,
             isSmallScreen,
+            isCallable: true,
           ),
-          Divider(height: isSmallScreen ? 18 : 24),
+          _buildDivider(isSmallScreen),
+          
+          // Police Emergency
           _buildHelplineItem(
-            'Crisis Text Line',
-            'Text HOME to 741741',
-            Icons.message,
+            'Police Emergency',
+            '118 / 119',
+            Icons.local_police,
             isSmallScreen,
+            isCallable: true,
+            alternateNumber: '119',
           ),
-          Divider(height: isSmallScreen ? 18 : 24),
+          _buildDivider(isSmallScreen),
+          
+          // Ambulance & Fire
           _buildHelplineItem(
-            'Emergency Services',
-            '911',
+            'Ambulance / Fire & Rescue',
+            '110',
             Icons.emergency,
             isSmallScreen,
+            isCallable: true,
+          ),
+          _buildDivider(isSmallScreen),
+          
+          // General Hospital Colombo
+          _buildHelplineItem(
+            'General Hospital Colombo',
+            '011-2691111',
+            Icons.local_hospital,
+            isSmallScreen,
+            isCallable: true,
+          ),
+          _buildDivider(isSmallScreen),
+          
+          // Tourist Police
+          _buildHelplineItem(
+            'Tourist Police',
+            '011-2421052',
+            Icons.support_agent,
+            isSmallScreen,
+            isCallable: true,
+          ),
+          _buildDivider(isSmallScreen),
+          
+          // Government Information Center
+          _buildHelplineItem(
+            'Government Information Center',
+            '1919',
+            Icons.info,
+            isSmallScreen,
+            isCallable: true,
+          ),
+          _buildDivider(isSmallScreen),
+          
+          // Report Crimes
+          _buildHelplineItem(
+            'Report Crimes',
+            '011-2691500',
+            Icons.report_problem,
+            isSmallScreen,
+            isCallable: true,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHelplineItem(String title, String contact, IconData icon, bool isSmallScreen) {
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.all(isSmallScreen ? 8 : 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+  Widget _buildDivider(bool isSmallScreen) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 8 : 12),
+      child: Divider(
+        color: Colors.red.shade200,
+        thickness: 1,
+        height: 1,
+      ),
+    );
+  }
+
+  Widget _buildHelplineItem(
+    String title, 
+    String contact, 
+    IconData icon, 
+    bool isSmallScreen, {
+    bool isCallable = false,
+    String? alternateNumber,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 4 : 8),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(isSmallScreen ? 8 : 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.red, size: isSmallScreen ? 18 : 22),
           ),
-          child: Icon(icon, color: Colors.red, size: isSmallScreen ? 18 : 24),
-        ),
-        SizedBox(width: isSmallScreen ? 10 : 15),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: isSmallScreen ? 14 : 16,
+          SizedBox(width: isSmallScreen ? 10 : 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: isSmallScreen ? 13 : 15,
+                    color: Colors.black87,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
-              ),
-              Text(
-                contact,
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: isSmallScreen ? 12 : 14,
+                SizedBox(height: 2),
+                Text(
+                  contact,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: isSmallScreen ? 12 : 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        if (title == 'National Suicide Prevention Lifeline' || title == 'Emergency Services')
-          IconButton(
-            icon: Icon(Icons.call, color: Colors.green, size: isSmallScreen ? 20 : 24),
-            onPressed: () {
-              _makeCall(contact == '988' ? '988' : '911');
-            },
-          ),
-      ],
+          if (isCallable) ...[
+            SizedBox(width: isSmallScreen ? 4 : 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.call, 
+                      color: Colors.green.shade600, 
+                      size: isSmallScreen ? 18 : 22
+                    ),
+                    onPressed: () {
+                      String numberToCall = contact.contains('/') 
+                          ? contact.split('/')[0].trim() 
+                          : contact;
+                      _makeCall(numberToCall.replaceAll('-', ''));
+                    },
+                    tooltip: 'Call $contact',
+                    constraints: BoxConstraints(
+                      minWidth: isSmallScreen ? 36 : 40,
+                      minHeight: isSmallScreen ? 36 : 40,
+                    ),
+                    padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
+                  ),
+                ),
+                if (alternateNumber != null) ...[
+                  SizedBox(width: 4),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.call, 
+                        color: Colors.blue.shade600, 
+                        size: isSmallScreen ? 18 : 22
+                      ),
+                      onPressed: () {
+                        _makeCall(alternateNumber.replaceAll('-', ''));
+                      },
+                      tooltip: 'Call $alternateNumber',
+                      constraints: BoxConstraints(
+                        minWidth: isSmallScreen ? 36 : 40,
+                        minHeight: isSmallScreen ? 36 : 40,
+                      ),
+                      padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

@@ -12,7 +12,20 @@
           "package_name": "com.mindcare.perera"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "816818496236-d2mrqbifq8a77j5lf35pogf0og109u2i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mindcare.perera",
+            "certificate_hash": "8adcaaa8e93bd08302b191039d71c9e6f2dc6e98"
+          }
+        },
+        {
+          "client_id": "816818496236-1a46iurk5eeplsl70u6qessjv0llk1s1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDEYuiSNhYI15fMErZNxxAtX4ninoyFBbo"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "816818496236-1a46iurk5eeplsl70u6qessjv0llk1s1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "816818496236-hksuenbjnkms1qhelabuog9gm2pqco7d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mindcare"
+              }
+            }
+          ]
         }
       }
     }
