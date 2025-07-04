@@ -17,13 +17,13 @@ class _BreathingIconState extends State<BreathingIcon>
   void initState() {
     super.initState();
     
-    // Controller for custom breathing animation - increased to 8 seconds
+    
     _breathingController = AnimationController(
       duration: const Duration(seconds: 20),
       vsync: this,
     )..repeat(reverse: true);
     
-    // Controller for Lottie animation - increased to 8 seconds
+
     _lottieController = AnimationController(
       duration: const Duration(seconds: 20),
       vsync: this,
@@ -47,7 +47,7 @@ class _BreathingIconState extends State<BreathingIcon>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Lottie breathing animation background
+ 
               Lottie.asset(
                 'assets/icons/breathing_icons/breth.json',
                 controller: _lottieController,
