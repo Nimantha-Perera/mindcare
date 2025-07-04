@@ -1,42 +1,63 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:mindcare/presentation/pages/authentications/service/authfirestore.dart';
 import 'package:mindcare/presentation/pages/home/home_page.dart';
+// Import your UserService
+// import 'package:mindcare/services/user_service.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   Future<void> _handleGoogleSignIn(BuildContext context) async {
-  try {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
-    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
-    if (googleUser == null) {
-      // User canceled the login
-      return;
+      if (googleUser == null) {
+        // User canceled the login
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = 
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Save user data to Firestore
+      final UserService userService = UserService();
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        await userService.createOrUpdateUser(
+          uid: user.uid,
+          email: user.email ?? '',
+          name: user.displayName ?? '',
+          photoUrl: user.photoURL,
+          additionalData: {
+            'provider': 'google',
+            'isEmailVerified': user.emailVerified,
+          },
+        );
+      }
+
+      // Navigate to home screen after successful login
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => HomePage()),
+      );
+    } catch (error) {
+      print("Google Sign-In error: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign in failed. Please try again.')),
+      );
     }
-
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    await FirebaseAuth.instance.signInWithCredential(credential);
-
-    // Navigate to home screen after successful login
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => HomePage()),
-    );
-  } catch (error) {
-    print("Google Sign-In error: $error");
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sign in failed. Please try again.')),
-    );
   }
-}
 
   @override
   Widget build(BuildContext context) {
