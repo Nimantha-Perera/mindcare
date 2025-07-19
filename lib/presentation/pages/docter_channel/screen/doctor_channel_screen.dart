@@ -152,7 +152,7 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
                 onAddToFavorites: () => _addToFavorites(state.userDoctors[index]),
                 onRemoveFromFavorites: () => _removeFromFavorites(state.userDoctors[index]),
                 onChat: () => _startChat(state.userDoctors[index]),
-                onBookAppointment: () => _bookAppointment(state.userDoctors[index]),
+                // onBookAppointment: () => _bookAppointment(state.userDoctors[index]),
               );
             },
           );
@@ -203,7 +203,7 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
               onAddToFavorites: () => _addToFavorites(doctor),
               onRemoveFromFavorites: () => _removeFromFavorites(doctor),
               onChat: () => _startChat(doctor),
-              onBookAppointment: () => _bookAppointment(doctor),
+              // onBookAppointment: () => _bookAppointment(doctor),
             );
           },
         ),

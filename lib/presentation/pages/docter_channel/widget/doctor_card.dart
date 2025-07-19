@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:mindcare/domain/entities/doctor.dart';
 import 'package:mindcare/presentation/pages/docter_channel/widget/doctor_detail_modal.dart';
 
@@ -8,7 +10,6 @@ class DoctorCard extends StatelessWidget {
   final VoidCallback onAddToFavorites;
   final VoidCallback onRemoveFromFavorites;
   final VoidCallback onChat;
-  final VoidCallback onBookAppointment;
 
   const DoctorCard({
     Key? key,
@@ -17,7 +18,6 @@ class DoctorCard extends StatelessWidget {
     required this.onAddToFavorites,
     required this.onRemoveFromFavorites,
     required this.onChat,
-    required this.onBookAppointment,
   }) : super(key: key);
 
   // Dummy profile images for doctors
@@ -258,44 +258,92 @@ class DoctorCard extends StatelessWidget {
     final labelSize = isMobile ? 11.0 : 12.0;
     final valueSize = isMobile ? 14.0 : 16.0;
 
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 8 : 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF6A4C93).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Consultation Fee',
-                style: TextStyle(
-                  fontSize: labelSize,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'LKR ${_formatCurrency(doctor.consultationFee)}',
-                style: TextStyle(
-                  fontSize: valueSize,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF6A4C93),
-                ),
-              ),
-            ],
-          ),
-          if (!isMobile)
-            Icon(
-              Icons.monetization_on_outlined,
-              color: const Color(0xFF6A4C93),
-              size: isDesktop ? 24 : 20,
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.all(isMobile ? 8 : 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6A4C93).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
             ),
-        ],
-      ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Consultation Fee',
+                      style: TextStyle(
+                        fontSize: labelSize,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'LKR ${_formatCurrency(doctor.consultationFee)}',
+                      style: TextStyle(
+                        fontSize: valueSize,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF6A4C93),
+                      ),
+                    ),
+                  ],
+                ),
+                if (!isMobile)
+                  Icon(
+                    Icons.monetization_on_outlined,
+                    color: const Color(0xFF6A4C93),
+                    size: isDesktop ? 24 : 20,
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.all(isMobile ? 8 : 12),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Mobile Number',
+                      style: TextStyle(
+                        fontSize: labelSize,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      doctor.mobileNumber ?? '+94 71 234 5678',
+                      style: TextStyle(
+                        fontSize: valueSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[700],
+                      ),
+                    ),
+                  ],
+                ),
+                if (!isMobile)
+                  Icon(
+                    Icons.phone,
+                    color: Colors.green[700],
+                    size: isDesktop ? 24 : 20,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -315,14 +363,14 @@ class DoctorCard extends StatelessWidget {
             width: double.infinity,
             height: buttonHeight,
             child: ElevatedButton.icon(
-              onPressed: onBookAppointment,
-              icon: Icon(Icons.calendar_today, size: iconSize),
+              onPressed: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
+              icon: Icon(Icons.phone, size: iconSize),
               label: Text(
-                'Book Appointment',
+                'Call Doctor',
                 style: TextStyle(fontSize: fontSize),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6A4C93),
+                backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
               ),
             ),
@@ -349,35 +397,35 @@ class DoctorCard extends StatelessWidget {
 
     return Row(
       children: [
-        Expanded(
-          child: SizedBox(
-            height: buttonHeight,
-            child: OutlinedButton.icon(
-              onPressed: onChat,
-              icon: Icon(Icons.chat_bubble_outline, size: iconSize),
-              label: Text(
-                'Chat',
-                style: TextStyle(fontSize: fontSize),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF6A4C93),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
+        // Expanded(
+        //   child: SizedBox(
+        //     height: buttonHeight,
+        //     child: OutlinedButton.icon(
+        //       onPressed: onChat,
+        //       icon: Icon(Icons.chat_bubble_outline, size: iconSize),
+        //       label: Text(
+        //         'Chat',
+        //         style: TextStyle(fontSize: fontSize),
+        //       ),
+        //       style: OutlinedButton.styleFrom(
+        //         foregroundColor: const Color(0xFF6A4C93),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(width: 8),
         Expanded(
           child: SizedBox(
             height: buttonHeight,
             child: ElevatedButton.icon(
-              onPressed: onBookAppointment,
-              icon: Icon(Icons.calendar_today, size: iconSize),
+              onPressed: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
+              icon: Icon(Icons.phone, size: iconSize),
               label: Text(
-                'Book',
+                'Call',
                 style: TextStyle(fontSize: fontSize),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6A4C93),
+                backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
               ),
             ),
@@ -385,6 +433,24 @@ class DoctorCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+    
+    try {
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri);
+      } else {
+        // Fallback: copy number to clipboard
+        await Clipboard.setData(ClipboardData(text: phoneNumber));
+        // You might want to show a snackbar here to inform the user
+      }
+    } catch (e) {
+      // Fallback: copy number to clipboard
+      await Clipboard.setData(ClipboardData(text: phoneNumber));
+      // You might want to show a snackbar here to inform the user
+    }
   }
 
   void _showDoctorDetails(BuildContext context) {
@@ -398,7 +464,7 @@ class DoctorCard extends StatelessWidget {
         onAddToFavorites: onAddToFavorites,
         onRemoveFromFavorites: onRemoveFromFavorites,
         onChat: onChat,
-        onBookAppointment: onBookAppointment,
+        onBookAppointment: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
       ),
     );
   }

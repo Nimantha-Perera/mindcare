@@ -21,10 +21,14 @@ class DoctorDetailsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width > 600;
+    final isLandscape = screenSize.width > screenSize.height;
+    
     return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      maxChildSize: 0.9,
-      minChildSize: 0.5,
+      initialChildSize: isLandscape ? 0.8 : 0.7,
+      maxChildSize: isLandscape ? 0.95 : 0.9,
+      minChildSize: isLandscape ? 0.6 : 0.5,
       builder: (context, scrollController) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -32,18 +36,18 @@ class DoctorDetailsModal extends StatelessWidget {
         ),
         child: SingleChildScrollView(
           controller: scrollController,
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(isTablet ? 32 : 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHandle(),
-              const SizedBox(height: 20),
-              _buildDoctorHeader(),
-              const SizedBox(height: 24),
-              _buildAboutSection(),
-              const SizedBox(height: 24),
-              _buildInfoCards(),
-              const SizedBox(height: 24),
+              SizedBox(height: isTablet ? 32 : 20),
+              _buildDoctorHeader(context),
+              SizedBox(height: isTablet ? 32 : 24),
+              _buildAboutSection(context),
+              SizedBox(height: isTablet ? 32 : 24),
+              _buildInfoCards(context),
+              SizedBox(height: isTablet ? 32 : 24),
               _buildActionButtons(context),
             ],
           ),
@@ -65,111 +69,153 @@ class DoctorDetailsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildDoctorHeader() {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundColor: Colors.grey[300],
-          backgroundImage: doctor.profileImage.isNotEmpty 
-              ? NetworkImage(doctor.profileImage)
-              : null,
-          child: doctor.profileImage.isEmpty
-              ? const Icon(
-                  Icons.person,
-                  size: 45,
-                  color: Colors.grey,
-                )
-              : null,
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
+  Widget _buildDoctorHeader(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width > 600;
+    final isSmallScreen = screenSize.width < 400;
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 500) {
+          // Wide layout for tablets and landscape
+          return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      doctor.name,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: isInUserList ? onRemoveFromFavorites : onAddToFavorites,
-                    icon: Icon(
-                      isInUserList ? Icons.favorite : Icons.favorite_border,
-                      color: isInUserList ? Colors.red : Colors.grey,
-                      size: 28,
-                    ),
-                  ),
-                ],
+              _buildProfileImage(isTablet ? 60 : 40),
+              SizedBox(width: isTablet ? 24 : 16),
+              Expanded(
+                child: _buildDoctorInfo(context, isTablet),
               ),
-              Text(
-                doctor.specialty,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.star, size: 20, color: Colors.amber),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${doctor.rating} (${doctor.reviews} reviews)',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-              if (doctor.isOnline) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'Online Now',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
             ],
+          );
+        } else {
+          // Narrow layout for phones
+          return Column(
+            children: [
+              _buildProfileImage(isSmallScreen ? 35 : 40),
+              SizedBox(height: isTablet ? 20 : 16),
+              _buildDoctorInfo(context, isTablet),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildProfileImage(double radius) {
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: Colors.grey[300],
+      backgroundImage: doctor.profileImage.isNotEmpty 
+          ? NetworkImage(doctor.profileImage)
+          : null,
+      child: doctor.profileImage.isEmpty
+          ? Icon(
+              Icons.person,
+              size: radius * 1.1,
+              color: Colors.grey,
+            )
+          : null,
+    );
+  }
+
+  Widget _buildDoctorInfo(BuildContext context, bool isTablet) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                doctor.name,
+                style: TextStyle(
+                  fontSize: isTablet ? 28 : (isSmallScreen ? 20 : 24),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: isInUserList ? onRemoveFromFavorites : onAddToFavorites,
+              icon: Icon(
+                isInUserList ? Icons.favorite : Icons.favorite_border,
+                color: isInUserList ? Colors.red : Colors.grey,
+                size: isTablet ? 32 : (isSmallScreen ? 24 : 28),
+              ),
+            ),
+          ],
+        ),
+        Text(
+          doctor.specialty,
+          style: TextStyle(
+            fontSize: isTablet ? 18 : (isSmallScreen ? 14 : 16),
+            color: Colors.grey[600],
           ),
         ),
+        SizedBox(height: isTablet ? 12 : 8),
+        Row(
+          children: [
+            Icon(
+              Icons.star, 
+              size: isTablet ? 24 : (isSmallScreen ? 16 : 20), 
+              color: Colors.amber,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '${doctor.rating} (${doctor.reviews} reviews)',
+              style: TextStyle(
+                fontSize: isTablet ? 16 : (isSmallScreen ? 12 : 14),
+              ),
+            ),
+          ],
+        ),
+        if (doctor.isOnline) ...[
+          SizedBox(height: isTablet ? 12 : 8),
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isTablet ? 16 : 12,
+              vertical: isTablet ? 8 : 6,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              'Online Now',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: isTablet ? 14 : (isSmallScreen ? 10 : 12),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  Widget _buildAboutSection() {
+  Widget _buildAboutSection(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width > 600;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'About',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: isTablet ? 22 : (isSmallScreen ? 16 : 18),
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: isTablet ? 12 : 8),
         Text(
           doctor.about,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: isTablet ? 16 : (isSmallScreen ? 13 : 14),
             color: Colors.grey[700],
             height: 1.5,
           ),
@@ -178,31 +224,67 @@ class DoctorDetailsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCards() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildInfoCard(
-            'Experience',
-            '${doctor.experience} years',
-            Icons.work_outline,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildInfoCard(
-            'Consultation Fee',
-            '\$${doctor.consultationFee}',
-            Icons.attach_money,
-          ),
-        ),
-      ],
+  Widget _buildInfoCards(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width > 600;
+    final isSmallScreen = screenSize.width < 400;
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Stack cards vertically on very small screens
+        if (constraints.maxWidth < 300) {
+          return Column(
+            children: [
+              _buildInfoCard(
+                'Experience',
+                '${doctor.experience} years',
+                Icons.work_outline,
+                context,
+              ),
+              SizedBox(height: isTablet ? 16 : 12),
+              _buildInfoCard(
+                'Consultation Fee',
+                '\Rs ${doctor.consultationFee}',
+                Icons.attach_money,
+                context,
+              ),
+            ],
+          );
+        } else {
+          // Side by side layout
+          return Row(
+            children: [
+              Expanded(
+                child: _buildInfoCard(
+                  'Experience',
+                  '${doctor.experience} years',
+                  Icons.work_outline,
+                  context,
+                ),
+              ),
+              SizedBox(width: isTablet ? 16 : 12),
+              Expanded(
+                child: _buildInfoCard(
+                  'Consultation Fee',
+                  '\Rs ${doctor.consultationFee}',
+                  Icons.attach_money,
+                  context,
+                ),
+              ),
+            ],
+          );
+        }
+      },
     );
   }
 
-  Widget _buildInfoCard(String title, String value, IconData icon) {
+  Widget _buildInfoCard(String title, String value, IconData icon, BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width > 600;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isTablet ? 20 : (isSmallScreen ? 12 : 16)),
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
@@ -210,21 +292,25 @@ class DoctorDetailsModal extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: const Color(0xFF6A4C93), size: 28),
-          const SizedBox(height: 8),
+          Icon(
+            icon, 
+            color: const Color(0xFF6A4C93), 
+            size: isTablet ? 32 : (isSmallScreen ? 24 : 28),
+          ),
+          SizedBox(height: isTablet ? 12 : 8),
           Text(
             title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: isTablet ? 14 : (isSmallScreen ? 10 : 12),
               color: Colors.grey[600],
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: isTablet ? 8 : 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: isTablet ? 18 : (isSmallScreen ? 14 : 16),
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
@@ -235,39 +321,128 @@ class DoctorDetailsModal extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              onChat();
-            },
-            icon: const Icon(Icons.chat_bubble_outline),
-            label: const Text('Start Chat'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              foregroundColor: const Color(0xFF6A4C93),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              onBookAppointment();
-            },
-            icon: const Icon(Icons.calendar_today),
-            label: const Text('Book Appointment'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6A4C93),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-          ),
-        ),
-      ],
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width > 600;
+    final isSmallScreen = screenSize.width < 400;
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Stack buttons vertically on very small screens
+        if (constraints.maxWidth < 300) {
+          return Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onChat();
+                  },
+                  icon: Icon(
+                    Icons.chat_bubble_outline,
+                    size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
+                  ),
+                  label: Text(
+                    'Start Chat',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : (isSmallScreen ? 14 : 15),
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      vertical: isTablet ? 16 : (isSmallScreen ? 10 : 12),
+                    ),
+                    foregroundColor: const Color(0xFF6A4C93),
+                  ),
+                ),
+              ),
+              SizedBox(height: isTablet ? 16 : 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onBookAppointment();
+                  },
+                  icon: Icon(
+                    Icons.calendar_today,
+                    size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
+                  ),
+                  label: Text(
+                    'Book Appointment',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : (isSmallScreen ? 14 : 15),
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6A4C93),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      vertical: isTablet ? 16 : (isSmallScreen ? 10 : 12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        } else {
+          // Side by side layout
+          return Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onChat();
+                  },
+                  icon: Icon(
+                    Icons.chat_bubble_outline,
+                    size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
+                  ),
+                  label: Text(
+                    'Start Chat',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : (isSmallScreen ? 12 : 15),
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      vertical: isTablet ? 16 : (isSmallScreen ? 10 : 12),
+                    ),
+                    foregroundColor: const Color(0xFF6A4C93),
+                  ),
+                ),
+              ),
+              SizedBox(width: isTablet ? 16 : 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onBookAppointment();
+                  },
+                  icon: Icon(
+                    Icons.calendar_today,
+                    size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
+                  ),
+                  label: Text(
+                    'Book Appointment',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : (isSmallScreen ? 12 : 15),
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6A4C93),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      vertical: isTablet ? 16 : (isSmallScreen ? 10 : 12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+      },
     );
   }
 }

@@ -11,6 +11,8 @@ class Doctor {
   final String profileImage;
   final String about;
   final DateTime nextAvailable;
+  final String? mobileNumber;
+
 
   const Doctor({
     required this.id,
@@ -24,6 +26,7 @@ class Doctor {
     required this.profileImage,
     required this.about,
     required this.nextAvailable,
+    this.mobileNumber,
   });
 
   Doctor copyWith({
@@ -38,6 +41,7 @@ class Doctor {
     String? profileImage,
     String? about,
     DateTime? nextAvailable,
+    String? mobileNumber,
   }) {
     return Doctor(
       id: id ?? this.id,
@@ -51,6 +55,7 @@ class Doctor {
       profileImage: profileImage ?? this.profileImage,
       about: about ?? this.about,
       nextAvailable: nextAvailable ?? this.nextAvailable,
+      mobileNumber: mobileNumber ?? this.mobileNumber,
     );
   }
 
