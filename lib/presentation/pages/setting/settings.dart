@@ -3,10 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mindcare/presentation/pages/authentications/login.dart';
 import 'package:mindcare/presentation/pages/setting/SettingItem.dart';
+import 'package:mindcare/presentation/pages/setting/edit_profile_screen.dart'; // Add this import
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
   void _handleLogout(BuildContext context) async {
     // Show confirmation dialog
     final bool confirm = await showDialog(
@@ -40,6 +46,21 @@ class SettingsScreen extends StatelessWidget {
           (route) => false,
         );
       }
+    }
+  }
+
+  void _navigateToEditProfile() async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const EditProfileScreen(),
+      ),
+    );
+    
+    // Refresh the screen if profile was updated
+    if (result == true) {
+      setState(() {
+        // This will trigger a rebuild to show updated user info
+      });
     }
   }
 
@@ -171,23 +192,26 @@ class SettingsScreen extends StatelessWidget {
                                         ),
                                   ),
                                   // Edit profile picture button
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.teal,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.white, width: 2),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          blurRadius: 5,
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.camera_alt_outlined,
-                                      color: Colors.white,
-                                      size: 16,
+                                  InkWell(
+                                    onTap: _navigateToEditProfile,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.teal,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white, width: 2),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            blurRadius: 5,
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.camera_alt_outlined,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -235,7 +259,7 @@ class SettingsScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 16),
                                     ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: _navigateToEditProfile,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal.shade50,
                                         foregroundColor: Colors.teal,
@@ -270,12 +294,12 @@ class SettingsScreen extends StatelessWidget {
                               ),
                               
                               // Settings Options - Enhanced with description
-                              _buildSettingItemWithDescription(
-                                icon: Icons.notifications_outlined,
-                                title: 'Notifications',
-                                description: 'Manage your app notifications',
-                                onTap: () {},
-                              ),
+                              // _buildSettingItemWithDescription(
+                              //   icon: Icons.notifications_outlined,
+                              //   title: 'Notifications',
+                              //   description: 'Manage your app notifications',
+                              //   onTap: () {},
+                              // ),
                               
                               _buildSettingItemWithDescription(
                                 icon: Icons.privacy_tip_outlined,
@@ -284,12 +308,12 @@ class SettingsScreen extends StatelessWidget {
                                 onTap: () {},
                               ),
                               
-                              _buildSettingItemWithDescription(
-                                icon: Icons.security_outlined,
-                                title: 'Security',
-                                description: 'Password and account protection',
-                                onTap: () {},
-                              ),
+                              // _buildSettingItemWithDescription(
+                              //   icon: Icons.security_outlined,
+                              //   title: 'Security',
+                              //   description: 'Password and account protection',
+                              //   onTap: () {},
+                              // ),
                               
                               // Section Title
                               Align(
