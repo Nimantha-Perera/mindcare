@@ -56,7 +56,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         });
       }
     } catch (e) {
-      _showSnackBar('Error picking image: $e', isError: true);
+      _showSnackBar('Error picking img: $e', isError: true);
     }
   }
   
