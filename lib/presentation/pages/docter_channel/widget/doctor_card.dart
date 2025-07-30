@@ -9,7 +9,6 @@ class DoctorCard extends StatelessWidget {
   final bool isInUserList;
   final VoidCallback onAddToFavorites;
   final VoidCallback onRemoveFromFavorites;
-  final VoidCallback onChat;
 
   const DoctorCard({
     Key? key,
@@ -17,20 +16,8 @@ class DoctorCard extends StatelessWidget {
     required this.isInUserList,
     required this.onAddToFavorites,
     required this.onRemoveFromFavorites,
-    required this.onChat,
   }) : super(key: key);
 
-  // Dummy profile images for doctors
-  static const List<String> _dummyImages = [
-    'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop&crop=face',
-    'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&h=200&fit=crop&crop=face',
-    'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=200&h=200&fit=crop&crop=face',
-    'https://images.unsplash.com/photo-1594824863349-d9b2918d7234?w=200&h=200&fit=crop&crop=face',
-    'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&h=200&fit=crop&crop=face',
-    'https://images.unsplash.com/photo-1638202993928-7267aad84c31?w=200&h=200&fit=crop&crop=face',
-    'https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=200&h=200&fit=crop&crop=face',
-    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=200&h=200&fit=crop&crop=face',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +117,9 @@ class DoctorCard extends StatelessWidget {
         CircleAvatar(
           radius: avatarRadius,
           backgroundColor: Colors.grey[300],
-          backgroundImage: _getDummyImage(),
+          backgroundImage: doctor.profileImage.isNotEmpty
+              ? NetworkImage(doctor.profileImage)
+              : const NetworkImage('https://firebasestorage.googleapis.com/v0/b/mindcare-e9b55.firebasestorage.app/o/doctor-1295571_1280.png?alt=media&token=78b0acbb-a308-4d66-a326-3824a6eec953'),
           child: null,
         ),
         SizedBox(width: isMobile ? 12 : 16),
@@ -380,10 +369,10 @@ class DoctorCard extends StatelessWidget {
             width: double.infinity,
             height: buttonHeight,
             child: OutlinedButton.icon(
-              onPressed: onChat,
-              icon: Icon(Icons.chat_bubble_outline, size: iconSize),
+              onPressed: () => _copyNumberToClipboard(doctor.mobileNumber ?? '+94712345678'),
+              icon: Icon(Icons.content_copy, size: iconSize),
               label: Text(
-                'Chat Now',
+                'Get Number',
                 style: TextStyle(fontSize: fontSize),
               ),
               style: OutlinedButton.styleFrom(
@@ -397,23 +386,23 @@ class DoctorCard extends StatelessWidget {
 
     return Row(
       children: [
-        // Expanded(
-        //   child: SizedBox(
-        //     height: buttonHeight,
-        //     child: OutlinedButton.icon(
-        //       onPressed: onChat,
-        //       icon: Icon(Icons.chat_bubble_outline, size: iconSize),
-        //       label: Text(
-        //         'Chat',
-        //         style: TextStyle(fontSize: fontSize),
-        //       ),
-        //       style: OutlinedButton.styleFrom(
-        //         foregroundColor: const Color(0xFF6A4C93),
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        // const SizedBox(width: 8),
+        Expanded(
+          child: SizedBox(
+            height: buttonHeight,
+            child: OutlinedButton.icon(
+              onPressed: () => _copyNumberToClipboard(doctor.mobileNumber ?? '+94712345678'),
+              icon: Icon(Icons.content_copy, size: iconSize),
+              label: Text(
+                'Get Number',
+                style: TextStyle(fontSize: fontSize),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF6A4C93),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
         Expanded(
           child: SizedBox(
             height: buttonHeight,
@@ -442,15 +431,15 @@ class DoctorCard extends StatelessWidget {
       if (await canLaunchUrl(phoneUri)) {
         await launchUrl(phoneUri);
       } else {
-        // Fallback: copy number to clipboard
         await Clipboard.setData(ClipboardData(text: phoneNumber));
-        // You might want to show a snackbar here to inform the user
       }
     } catch (e) {
-      // Fallback: copy number to clipboard
       await Clipboard.setData(ClipboardData(text: phoneNumber));
-      // You might want to show a snackbar here to inform the user
     }
+  }
+
+  void _copyNumberToClipboard(String phoneNumber) async {
+    await Clipboard.setData(ClipboardData(text: phoneNumber));
   }
 
   void _showDoctorDetails(BuildContext context) {
@@ -463,17 +452,15 @@ class DoctorCard extends StatelessWidget {
         isInUserList: isInUserList,
         onAddToFavorites: onAddToFavorites,
         onRemoveFromFavorites: onRemoveFromFavorites,
-        onChat: onChat,
-        onBookAppointment: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
+        onCall: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
       ),
     );
   }
 
-  NetworkImage _getDummyImage() {
-    // Use doctor's name hash to consistently assign the same image
-    final imageIndex = doctor.name.hashCode.abs() % _dummyImages.length;
-    return NetworkImage(_dummyImages[imageIndex]);
-  }
+  // NetworkImage _getDummyImage() {
+  //   final imageIndex = doctor.name.hashCode.abs() % _dummyImages.length;
+  //   return NetworkImage(_dummyImages[imageIndex]);
+  // }
 
   String _formatAvailability(DateTime dateTime) {
     final now = DateTime.now();
@@ -489,7 +476,6 @@ class DoctorCard extends StatelessWidget {
   }
 
   String _formatCurrency(int amount) {
-    // Format Sri Lankan Rupees with commas
     final String amountStr = amount.toString();
     final RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
     return amountStr.replaceAllMapped(reg, (Match match) => '${match[1]},');

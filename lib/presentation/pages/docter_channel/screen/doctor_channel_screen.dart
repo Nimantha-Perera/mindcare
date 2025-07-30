@@ -6,7 +6,6 @@ import 'package:mindcare/presentation/pages/docter_channel/widget/doctor_card.da
 import 'package:mindcare/presentation/pages/docter_channel/widget/empty_state.dart';
 import 'package:mindcare/presentation/pages/docter_channel/widget/filter_section.dart';
 
-
 class DoctorChannelScreen extends StatefulWidget {
   const DoctorChannelScreen({Key? key}) : super(key: key);
 
@@ -17,6 +16,9 @@ class DoctorChannelScreen extends StatefulWidget {
 class _DoctorChannelScreenState extends State<DoctorChannelScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
+  String _searchQuery = '';
 
   final List<String> _specialties = [
     'All',
@@ -33,55 +35,60 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     
-    // Load doctors when screen initializes
+   
     context.read<DoctorCubit>().loadDoctors();
+    
+
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text;
+    });
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+        _searchQuery = '';
+      }
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+    });
+  }
+
+  List<Doctor> _filterDoctorsBySearch(List<Doctor> doctors) {
+    if (_searchQuery.isEmpty) return doctors;
+    
+    final query = _searchQuery.toLowerCase();
+    return doctors.where((doctor) {
+      return doctor.name.toLowerCase().contains(query) ||
+             doctor.specialty.toLowerCase().contains(query) ||
+             (doctor.about.toLowerCase().contains(query));
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Mental Health Doctors',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: const Color(0xFF6A4C93),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () {
-              // TODO: Implement search functionality
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {
-              // TODO: Implement notifications
-            },
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Find Doctors'),
-            Tab(text: 'My Doctors'),
-          ],
-        ),
-      ),
+      appBar: _buildAppBar(),
       body: TabBarView(
         controller: _tabController,
         children: [
@@ -90,6 +97,79 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
         ],
       ),
     );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: _isSearching ? _buildSearchField() : const Text(
+        'Doctors',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      backgroundColor: const Color(0xFF6A4C93),
+      elevation: 0,
+      actions: _buildAppBarActions(),
+      bottom: _isSearching ? null : TabBar(
+        controller: _tabController,
+        indicatorColor: Colors.white,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        tabs: const [
+          Tab(text: 'Find Doctors'),
+          Tab(text: 'My Doctors'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchController,
+      autofocus: true,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: 'Search doctors, specialties...',
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        border: InputBorder.none,
+        suffixIcon: _searchQuery.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear, color: Colors.white),
+                onPressed: _clearSearch,
+              )
+            : null,
+      ),
+      onChanged: (value) {
+        setState(() {
+          _searchQuery = value;
+        });
+      },
+    );
+  }
+
+  List<Widget> _buildAppBarActions() {
+    if (_isSearching) {
+      return [
+        IconButton(
+          icon: const Icon(Icons.close, color: Colors.white),
+          onPressed: _toggleSearch,
+        ),
+      ];
+    }
+
+    return [
+      IconButton(
+        icon: const Icon(Icons.search, color: Colors.white),
+        onPressed: _toggleSearch,
+      ),
+      IconButton(
+        icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+        onPressed: () {
+          // TODO: Implement notifications
+        },
+      ),
+    ];
   }
 
   Widget _buildFindDoctorsTab() {
@@ -107,23 +187,46 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
       builder: (context, state) {
         return Column(
           children: [
-            FilterSection(
-              specialties: _specialties,
-              selectedSpecialty: state is DoctorLoaded ? state.selectedSpecialty : 'All',
-              isOnlineOnly: state is DoctorLoaded ? state.isOnlineOnly : false,
-              onSpecialtyChanged: (specialty) {
-                context.read<DoctorCubit>().filterDoctors(specialty: specialty);
-              },
-              onOnlineFilterChanged: (isOnlineOnly) {
-                context.read<DoctorCubit>().filterDoctors(isOnlineOnly: isOnlineOnly);
-              },
-            ),
+           
+            if (_isSearching && _searchQuery.isNotEmpty)
+              _buildSearchResultsHeader(),
+            
+            
+            if (!_isSearching)
+              FilterSection(
+                specialties: _specialties,
+                selectedSpecialty: state is DoctorLoaded ? state.selectedSpecialty : 'All',
+                isOnlineOnly: state is DoctorLoaded ? state.isOnlineOnly : false,
+                onSpecialtyChanged: (specialty) {
+                  context.read<DoctorCubit>().filterDoctors(specialty: specialty);
+                },
+                onOnlineFilterChanged: (isOnlineOnly) {
+                  context.read<DoctorCubit>().filterDoctors(isOnlineOnly: isOnlineOnly);
+                },
+              ),
+            
             Expanded(
               child: _buildDoctorsList(state),
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildSearchResultsHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.grey[100],
+      child: Text(
+        'Search results for "$_searchQuery"',
+        style: TextStyle(
+          fontSize: 14,
+          color: Colors.grey[600],
+          fontStyle: FontStyle.italic,
+        ),
+      ),
     );
   }
 
@@ -135,6 +238,9 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
         }
         
         if (state is DoctorLoaded) {
+      
+          final filteredDoctors = _filterDoctorsBySearch(state.userDoctors);
+          
           if (state.userDoctors.isEmpty) {
             return const EmptyState(
               message: 'No saved doctors yet',
@@ -142,19 +248,46 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
             );
           }
           
-          return ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: state.userDoctors.length,
-            itemBuilder: (context, index) {
-              return DoctorCard(
-                doctor: state.userDoctors[index],
-                isInUserList: true,
-                onAddToFavorites: () => _addToFavorites(state.userDoctors[index]),
-                onRemoveFromFavorites: () => _removeFromFavorites(state.userDoctors[index]),
-                onChat: () => _startChat(state.userDoctors[index]),
-                // onBookAppointment: () => _bookAppointment(state.userDoctors[index]),
-              );
-            },
+          if (filteredDoctors.isEmpty && _searchQuery.isNotEmpty) {
+            return EmptyState(
+              message: 'No doctors found',
+              subtitle: 'No saved doctors match "$_searchQuery"',
+            );
+          }
+          
+          return Column(
+            children: [
+          
+              if (_searchQuery.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  color: Colors.grey[100],
+                  child: Text(
+                    '${filteredDoctors.length} of ${state.userDoctors.length} doctors found',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: filteredDoctors.length,
+                  itemBuilder: (context, index) {
+                    return DoctorCard(
+                      doctor: filteredDoctors[index],
+                      isInUserList: true,
+                      onAddToFavorites: () => _addToFavorites(filteredDoctors[index]),
+                      onRemoveFromFavorites: () => _removeFromFavorites(filteredDoctors[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         }
         
@@ -176,10 +309,20 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
     }
 
     if (state is DoctorLoaded) {
+      // Apply search filter to all doctors
+      final filteredDoctors = _filterDoctorsBySearch(state.doctors);
+      
       if (state.doctors.isEmpty) {
         return const EmptyState(
           message: 'No doctors found',
           subtitle: 'Try adjusting your filters',
+        );
+      }
+      
+      if (filteredDoctors.isEmpty && _searchQuery.isNotEmpty) {
+        return EmptyState(
+          message: 'No doctors found',
+          subtitle: 'No doctors match "$_searchQuery"',
         );
       }
 
@@ -190,22 +333,41 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
             isOnlineOnly: state.isOnlineOnly,
           );
         },
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: state.doctors.length,
-          itemBuilder: (context, index) {
-            final doctor = state.doctors[index];
-            final isInUserList = state.userDoctors.any((d) => d.id == doctor.id);
+        child: Column(
+          children: [
+            // Show results count when searching
+            if (_searchQuery.isNotEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  '${filteredDoctors.length} doctors found',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             
-            return DoctorCard(
-              doctor: doctor,
-              isInUserList: isInUserList,
-              onAddToFavorites: () => _addToFavorites(doctor),
-              onRemoveFromFavorites: () => _removeFromFavorites(doctor),
-              onChat: () => _startChat(doctor),
-              // onBookAppointment: () => _bookAppointment(doctor),
-            );
-          },
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: filteredDoctors.length,
+                itemBuilder: (context, index) {
+                  final doctor = filteredDoctors[index];
+                  final isInUserList = state.userDoctors.any((d) => d.id == doctor.id);
+                  
+                  return DoctorCard(
+                    doctor: doctor,
+                    isInUserList: isInUserList,
+                    onAddToFavorites: () => _addToFavorites(doctor),
+                    onRemoveFromFavorites: () => _removeFromFavorites(doctor),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       );
     }

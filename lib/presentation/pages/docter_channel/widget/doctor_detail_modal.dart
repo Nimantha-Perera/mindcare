@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:mindcare/domain/entities/doctor.dart'; // ✅ CORRECT IMPORT
+import 'package:mindcare/domain/entities/doctor.dart';
 
 class DoctorDetailsModal extends StatelessWidget {
   final Doctor doctor;
   final bool isInUserList;
   final VoidCallback onAddToFavorites;
   final VoidCallback onRemoveFromFavorites;
-  final VoidCallback onChat;
-  final VoidCallback onBookAppointment;
+  final VoidCallback onCall;
 
   const DoctorDetailsModal({
     Key? key,
@@ -15,8 +14,7 @@ class DoctorDetailsModal extends StatelessWidget {
     required this.isInUserList,
     required this.onAddToFavorites,
     required this.onRemoveFromFavorites,
-    required this.onChat,
-    required this.onBookAppointment,
+    required this.onCall,
   }) : super(key: key);
 
   @override
@@ -77,7 +75,6 @@ class DoctorDetailsModal extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 500) {
-          // Wide layout for tablets and landscape
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -89,7 +86,6 @@ class DoctorDetailsModal extends StatelessWidget {
             ],
           );
         } else {
-          // Narrow layout for phones
           return Column(
             children: [
               _buildProfileImage(isSmallScreen ? 35 : 40),
@@ -126,26 +122,12 @@ class DoctorDetailsModal extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                doctor.name,
-                style: TextStyle(
-                  fontSize: isTablet ? 28 : (isSmallScreen ? 20 : 24),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            IconButton(
-              onPressed: isInUserList ? onRemoveFromFavorites : onAddToFavorites,
-              icon: Icon(
-                isInUserList ? Icons.favorite : Icons.favorite_border,
-                color: isInUserList ? Colors.red : Colors.grey,
-                size: isTablet ? 32 : (isSmallScreen ? 24 : 28),
-              ),
-            ),
-          ],
+        Text(
+          doctor.name,
+          style: TextStyle(
+            fontSize: isTablet ? 28 : (isSmallScreen ? 20 : 24),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           doctor.specialty,
@@ -231,7 +213,6 @@ class DoctorDetailsModal extends StatelessWidget {
     
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Stack cards vertically on very small screens
         if (constraints.maxWidth < 300) {
           return Column(
             children: [
@@ -251,7 +232,6 @@ class DoctorDetailsModal extends StatelessWidget {
             ],
           );
         } else {
-          // Side by side layout
           return Row(
             children: [
               Expanded(
@@ -327,7 +307,6 @@ class DoctorDetailsModal extends StatelessWidget {
     
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Stack buttons vertically on very small screens
         if (constraints.maxWidth < 300) {
           return Column(
             children: [
@@ -336,14 +315,14 @@ class DoctorDetailsModal extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
-                    onChat();
+                    onCall();
                   },
                   icon: Icon(
-                    Icons.chat_bubble_outline,
+                    Icons.phone,
                     size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
                   ),
                   label: Text(
-                    'Start Chat',
+                    'Call Doctor',
                     style: TextStyle(
                       fontSize: isTablet ? 16 : (isSmallScreen ? 14 : 15),
                     ),
@@ -360,22 +339,19 @@ class DoctorDetailsModal extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    onBookAppointment();
-                  },
+                  onPressed: isInUserList ? onRemoveFromFavorites : onAddToFavorites,
                   icon: Icon(
-                    Icons.calendar_today,
+                    isInUserList ? Icons.favorite : Icons.favorite_border,
                     size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
                   ),
                   label: Text(
-                    'Book Appointment',
+                    isInUserList ? 'Remove from Favorites' : 'Add to Favorites',
                     style: TextStyle(
                       fontSize: isTablet ? 16 : (isSmallScreen ? 14 : 15),
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6A4C93),
+                    backgroundColor: isInUserList ? Colors.red : const Color(0xFF6A4C93),
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(
                       vertical: isTablet ? 16 : (isSmallScreen ? 10 : 12),
@@ -386,21 +362,20 @@ class DoctorDetailsModal extends StatelessWidget {
             ],
           );
         } else {
-          // Side by side layout
           return Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
-                    onChat();
+                    onCall();
                   },
                   icon: Icon(
-                    Icons.chat_bubble_outline,
+                    Icons.phone,
                     size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
                   ),
                   label: Text(
-                    'Start Chat',
+                    'Call Doctor',
                     style: TextStyle(
                       fontSize: isTablet ? 16 : (isSmallScreen ? 12 : 15),
                     ),
@@ -416,22 +391,19 @@ class DoctorDetailsModal extends StatelessWidget {
               SizedBox(width: isTablet ? 16 : 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    onBookAppointment();
-                  },
+                  onPressed: isInUserList ? onRemoveFromFavorites : onAddToFavorites,
                   icon: Icon(
-                    Icons.calendar_today,
+                    isInUserList ? Icons.favorite : Icons.favorite_border,
                     size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
                   ),
                   label: Text(
-                    'Book Appointment',
+                    isInUserList ? 'Remove Favorite' : 'Add Favorite',
                     style: TextStyle(
                       fontSize: isTablet ? 16 : (isSmallScreen ? 12 : 15),
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6A4C93),
+                    backgroundColor: isInUserList ? Colors.red : const Color(0xFF6A4C93),
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(
                       vertical: isTablet ? 16 : (isSmallScreen ? 10 : 12),

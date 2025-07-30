@@ -14,12 +14,14 @@ class DoctorModel extends Doctor {
     required super.profileImage,
     required super.about,
     required super.nextAvailable,
+    super.mobileNumber,
   });
 
   factory DoctorModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return DoctorModel(
       id: doc.id,
+      mobileNumber: data['mobileNumber'],
       name: data['name'] ?? '',
       specialty: data['specialty'] ?? '',
       rating: (data['rating'] ?? 0.0).toDouble(),
@@ -48,6 +50,7 @@ class DoctorModel extends Doctor {
       profileImage: doctor.profileImage,
       about: doctor.about,
       nextAvailable: doctor.nextAvailable,
+      mobileNumber: doctor.mobileNumber,
     );
   }
 
@@ -63,6 +66,7 @@ class DoctorModel extends Doctor {
       'profileImage': profileImage,
       'about': about,
       'nextAvailable': Timestamp.fromDate(nextAvailable),
+      'mobileNumber': mobileNumber,
     };
   }
 
@@ -79,6 +83,7 @@ class DoctorModel extends Doctor {
       profileImage: profileImage,
       about: about,
       nextAvailable: nextAvailable,
+      mobileNumber: mobileNumber,
     );
   }
 }
