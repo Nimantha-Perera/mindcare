@@ -4,49 +4,126 @@ import '../../domain/models/message.dart';
 
 class GeminiService {
   final GenerativeModel _model;
-  final String _defaultPrompt = '''
-You are a compassionate mental health professional named Happy Bot. 
-Always respond with empathy, understanding, and professional expertise.
-Keep responses concise and helpful.
-If someone appears to be in crisis, gently suggest they seek immediate professional help.
-Provide practical self-care tips and strategies when appropriate.
-Maintain confidentiality and assure users their concerns are valid.
-Do not diagnose but offer support and general information.
-Use a warm, caring tone in all communications.
-Format important advice or takeaways with markdown for clarity.
-Respond in the same language the user writes in.
-''';
+  
+  // Multi-language prompts loaded from .env
+  late final Map<String, String> _prompts;
+  late final Map<String, String> _errorMessages;
+  late final Map<String, String> _errorWithDetailsMessages;
 
-  // Replace with your actual API key
-  static final String _apiKey = dotenv.env['GEMINAI_API_KEY']!;
-  // static const String _apiKey = ;
+  static final String _apiKey = dotenv.env['GEMINAI_API_KEY'] ?? '';
 
-  GeminiService()
-      : _model = GenerativeModel(
+  GeminiService() : _model = GenerativeModel(
           model: 'gemini-2.0-flash',
           apiKey: _apiKey,
-        );
+        ) {
+    _initializePrompts();
+    _initializeErrorMessages();
+  }
 
-  Future<String> generateResponse(List<Message> chatHistory) async {
+  // Initialize prompts from environment variables
+  void _initializePrompts() {
+    _prompts = {
+      'english': dotenv.env['DEFAULT_PROMPT_ENGLISH']!,
+      'sinhala': dotenv.env['DEFAULT_PROMPT_SINHALA']!,
+      'tamil': dotenv.env['DEFAULT_PROMPT_TAMIL']!,
+    };
+  }
+
+  // Initialize error messages from environment variables
+  void _initializeErrorMessages() {
+    _errorMessages = {
+      'english': dotenv.env['ERROR_MESSAGE_ENGLISH']!,
+      'sinhala': dotenv.env['ERROR_MESSAGE_SINHALA']!,
+      'tamil': dotenv.env['ERROR_MESSAGE_TAMIL']!,
+    };
+
+    _errorWithDetailsMessages = {
+      'english': dotenv.env['ERROR_WITH_DETAILS_ENGLISH']!,
+      'sinhala': dotenv.env['ERROR_WITH_DETAILS_SINHALA']!,
+      'tamil': dotenv.env['ERROR_WITH_DETAILS_TAMIL']!,
+    };
+  }
+
+  // Language detection based on text content
+  String _detectLanguage(String text) {
+    // Simple language detection logic
+    if (text.contains(RegExp(r'[\u0D80-\u0DFF]'))) {
+      return 'sinhala'; // Sinhala Unicode range
+    } else if (text.contains(RegExp(r'[\u0B80-\u0BFF]'))) {
+      return 'tamil'; // Tamil Unicode range
+    } else {
+      return 'english'; // Default to English
+    }
+  }
+
+  // Method to update prompts at runtime (optional)
+  void updatePrompt(String language, String newPrompt) {
+    if (_prompts.containsKey(language)) {
+      _prompts[language] = newPrompt;
+    }
+  }
+
+  // Method to get current prompt for a language
+  String getPrompt(String language) {
+    return _prompts[language]!;
+  }
+
+  // Alternative method: Allow explicit language setting
+  Future<String> generateResponse(List<Message> chatHistory, {String? language}) async {
     try {
-      // Create content with the default prompt
-      final systemContent = Content.text(_defaultPrompt);
+      // Validate API key
+      if (_apiKey.isEmpty) {
+        throw Exception('Gemini API key not found in environment variables');
+      }
 
-      // Create content with the user's message
+      // Get the user's message
       final userMessage = chatHistory.last.text;
-      final userContent = Content.text(userMessage);
+      
+      // Detect language if not explicitly provided
+      final detectedLanguage = language ?? _detectLanguage(userMessage);
+      
+      // Get the appropriate prompt
+      final systemPrompt = _prompts[detectedLanguage]!;
 
-      // Create a combined prompt with both system instructions and user message
-      final combinedPrompt = "$_defaultPrompt\n\nUser: $userMessage";
+      // Create a combined prompt with system instructions and user message
+      final combinedPrompt = "$systemPrompt\n\nUser: $userMessage";
 
       // Generate content using the model
-      final response =
-          await _model.generateContent([Content.text(combinedPrompt)]);
+      final response = await _model.generateContent([Content.text(combinedPrompt)]);
 
       // Extract the text from the response
-      return response.text ?? "I'm sorry, I couldn't generate a response.";
+      return response.text ?? _getErrorMessage(detectedLanguage);
     } catch (e) {
-      return "Sorry, I encountered an error: $e";
+      // Return error message in appropriate language
+      final detectedLanguage = language ?? _detectLanguage(chatHistory.last.text);
+      return _getErrorMessage(detectedLanguage, e.toString());
     }
+  }
+
+  // Get error messages in different languages
+  String _getErrorMessage(String language, [String? error]) {
+    if (error != null) {
+      final template = _errorWithDetailsMessages[language]!;
+      return template.replaceAll('{error}', error);
+    } else {
+      return _errorMessages[language]!;
+    }
+  }
+
+  // Method to validate configuration
+  bool validateConfiguration() {
+    return _apiKey.isNotEmpty && 
+           _prompts.isNotEmpty && 
+           _errorMessages.isNotEmpty;
+  }
+
+  // Method to get configuration status
+  Map<String, dynamic> getConfigurationStatus() {
+    return {
+      'hasApiKey': _apiKey.isNotEmpty,
+      'availableLanguages': _prompts.keys.toList(),
+      'promptsLoaded': _prompts.length,
+      'errorMessagesLoaded': _errorMessages.length,
+    };
   }
 }

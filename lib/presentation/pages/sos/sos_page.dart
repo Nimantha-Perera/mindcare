@@ -38,9 +38,9 @@ class _SOSPageState extends State<SOSPage> with SingleTickerProviderStateMixin {
     // Mock data - in real app, load from storage
     setState(() {
       _emergencyContacts.addAll([
-        'Mom: 555-123-4567',
-        'Dad: 555-234-5678',
-        'Therapist: 555-345-6789',
+        'Mom: 077-123-4567',
+        'Dad: 077-234-5678',
+        'Therapist: 077-345-6789',
       ]);
     });
   }

@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:mindcare/presentation/pages/chatbot/viewmodals/chat_view_model.dart';
+import 'package:mindcare/presentation/pages/chatbot/viewmodals/language_selector.dart';
 import 'package:mindcare/presentation/pages/chatbot/widgets/message_bubble.dart';
 import 'package:provider/provider.dart';
 
@@ -44,7 +45,8 @@ class _HappyBotPageState extends State<HappyBotPage> {
         body: SafeArea(
           child: Consumer<ChatViewModel>(
             builder: (context, viewModel, _) {
-              WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+              WidgetsBinding.instance
+                  .addPostFrameCallback((_) => _scrollToBottom());
               return Stack(
                 children: [
                   // Backdrop effect
@@ -63,7 +65,7 @@ class _HappyBotPageState extends State<HappyBotPage> {
                       ),
                     ),
                   ),
-                  
+
                   // White backdrop overlay with frosted glass effect
                   Positioned.fill(
                     child: Container(
@@ -80,7 +82,7 @@ class _HappyBotPageState extends State<HappyBotPage> {
                       ),
                     ),
                   ),
-                  
+
                   // Decorative elements
                   Positioned(
                     top: -50,
@@ -94,7 +96,7 @@ class _HappyBotPageState extends State<HappyBotPage> {
                       ),
                     ),
                   ),
-                  
+
                   Positioned(
                     bottom: -60,
                     left: -60,
@@ -107,11 +109,13 @@ class _HappyBotPageState extends State<HappyBotPage> {
                       ),
                     ),
                   ),
-                  
+
                   // Main Content
                   Column(
                     children: [
                       // Header with enhanced design
+                      // Replace the existing header Container in your HappyBotPage with this:
+
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -130,34 +134,47 @@ class _HappyBotPageState extends State<HappyBotPage> {
                           ],
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.psychology,
-                                color: Colors.white,
-                                size: 22,
+                            // Language selector on the left
+                            LanguageSelector(),
+
+                            // Centered title
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.psychology,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  const Text(
+                                    "Happy Bot",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            const Text(
-                              "Happy Bot",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
+
+                            // Empty space to balance the layout
+                            SizedBox(width: 40),
                           ],
                         ),
                       ),
-                      
+
                       // Chat messages with backdrop effect
                       Expanded(
                         child: Container(
@@ -165,14 +182,16 @@ class _HappyBotPageState extends State<HappyBotPage> {
                             color: Colors.white.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 12),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
                             child: BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                               child: ListView.builder(
                                 controller: _scrollController,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 16),
                                 itemCount: viewModel.messages.length,
                                 itemBuilder: (context, index) {
                                   final message = viewModel.messages[index];
@@ -183,11 +202,12 @@ class _HappyBotPageState extends State<HappyBotPage> {
                           ),
                         ),
                       ),
-                      
+
                       // Input area with frosted glass effect
                       Container(
                         margin: const EdgeInsets.all(16),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(30),
@@ -209,7 +229,8 @@ class _HappyBotPageState extends State<HappyBotPage> {
                                   hintText: 'Type your message...',
                                   hintStyle: TextStyle(color: Colors.grey),
                                   border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                  contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 16),
                                 ),
                                 onSubmitted: (text) {
                                   if (text.trim().isNotEmpty) {
@@ -222,17 +243,24 @@ class _HappyBotPageState extends State<HappyBotPage> {
                             Container(
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF008F76), Color(0xFF0066CC)],
+                                  colors: [
+                                    Color(0xFF008F76),
+                                    Color(0xFF0066CC)
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(24),
                               ),
                               child: IconButton(
-                                icon: const Icon(Icons.send_rounded, color: Colors.white),
+                                icon: const Icon(Icons.send_rounded,
+                                    color: Colors.white),
                                 onPressed: () {
-                                  if (_messageController.text.trim().isNotEmpty) {
-                                    viewModel.sendMessage(_messageController.text);
+                                  if (_messageController.text
+                                      .trim()
+                                      .isNotEmpty) {
+                                    viewModel
+                                        .sendMessage(_messageController.text);
                                     _messageController.clear();
                                   }
                                 },
