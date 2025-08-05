@@ -1,3 +1,21 @@
+buildscript {
+    ext.kotlin_version = '2.1.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // This is the Android Gradle Plugin version.
+        // Update it to 8.3.0 to resolve the warning you previously saw.
+        classpath 'com.android.tools.build:gradle:8.3.0'
+
+        // This is the Google Services plugin.
+        // It's crucial for Firebase. Ensure you have the latest stable version.
+        // As of now, 4.4.1 is a good recent version.
+        classpath 'com.google.gms:google-services:4.4.1'
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -5,12 +23,12 @@ allprojects {
     }
 }
 
-rootProject.buildDir = "../build"
+rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 subprojects {
-    project.evaluationDependsOn(":app")
+    project.evaluationDependsOn(':app')
 }
 
 tasks.register("clean", Delete) {
