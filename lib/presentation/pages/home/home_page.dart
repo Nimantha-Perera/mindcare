@@ -9,6 +9,7 @@ import 'package:mindcare/presentation/pages/relax_mind_dash/relax_my_mind_dash.d
 import 'package:mindcare/presentation/pages/relax_musics/relax_musics_page.dart';
 import 'package:mindcare/presentation/pages/setting/settings.dart';
 import 'package:mindcare/presentation/pages/stress_level/screens/stress_level_quiz.dart';
+import 'package:mindcare/presentation/routes/app_routes.dart';
 
 class HomePage extends StatelessWidget {
 
@@ -18,15 +19,15 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => FaceDetectionScreen()),
-          );
-        },
-        child: const Icon(Icons.emoji_emotions, color: Colors.white),
-      ),
+  backgroundColor: Colors.black,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(50),
+  ),
+  onPressed: () {
+    Navigator.pushNamed(context, AppRoutes.moodDetector);
+  },
+  child: const Icon(Icons.emoji_emotions, color: Colors.white),
+),
       body: Stack(
         children: [
           // Beautiful white backdrop with subtle patterns
@@ -64,10 +65,7 @@ class HomePage extends StatelessWidget {
         child: InkWell(
           onTap: () {
             // Navigate to settings or show modal
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => SettingsScreen()),
-            );
+           Navigator.pushNamed(context, AppRoutes.settings1);
           },
           borderRadius: BorderRadius.circular(20),
           child: Ink(
@@ -127,10 +125,7 @@ class HomePage extends StatelessWidget {
             leftIcon: Icons.arrow_forward_ios,
             rightImageAsset: 'assets/icons/mindfulness1.png',
             leftBackgroundColor: const Color(0xFF0057B2),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => RelaxMyMindDashboard()),
-            ),
+            onTap: () => Navigator.pushNamed(context, AppRoutes.relaxMindDash)
           ),
         ),
         const SizedBox(height: 16),
@@ -141,10 +136,7 @@ class HomePage extends StatelessWidget {
             rightIcon: Icons.analytics,
             rightBackgroundColor: const Color(0xFF008450),
             onTap: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => StressLevelQuiz()),
-              ),
+              Navigator.pushNamed(context, AppRoutes.stressLevelQuiz)
             },
           ),
         ),
@@ -155,10 +147,7 @@ class HomePage extends StatelessWidget {
             leftText: "Ask",
             rightImageAsset: 'assets/icons/Bot1.png',
             leftBackgroundColor: const Color(0xFF0057B2),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => HappyBotPage()),
-            ),
+            onTap: () => Navigator.pushNamed(context, AppRoutes.happyBot)
           ),
         ),
         const SizedBox(height: 16),
@@ -168,10 +157,7 @@ class HomePage extends StatelessWidget {
             leftImageAsset: 'assets/icons/Extra1.png',
             rightIcon: Icons.arrow_forward,
             rightBackgroundColor: const Color(0xFF008450),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => ExtrasDashboard()),
-            ),
+            onTap: () => Navigator.pushNamed(context, AppRoutes.extrasDash)
           ),
         ),
       ],

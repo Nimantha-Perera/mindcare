@@ -7,6 +7,7 @@ import 'package:mindcare/presentation/pages/docter_channel/injection_container.d
 import 'package:mindcare/presentation/pages/home/home_page.dart';
 import 'package:mindcare/presentation/pages/mood_detector/mood_detecter.dart';
 import 'package:mindcare/presentation/pages/relax_musics/bloc/music/music_bloc.dart';
+import 'package:mindcare/presentation/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider<MusicBloc>(
       create: (_) => MusicBloc(),
       child: MaterialApp(
+        onGenerateRoute: AppRoutes.generateRoute,
         title: 'MindCare',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(

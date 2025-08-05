@@ -13,14 +13,35 @@ class HappyBotPage extends StatefulWidget {
   State<HappyBotPage> createState() => _HappyBotPageState();
 }
 
-class _HappyBotPageState extends State<HappyBotPage> {
+class _HappyBotPageState extends State<HappyBotPage>
+    with TickerProviderStateMixin {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late AnimationController _typingAnimationController;
+  late Animation<double> _typingAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _typingAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _typingAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _typingAnimationController,
+      curve: Curves.easeInOut,
+    ));
+    _typingAnimationController.repeat(reverse: true);
+  }
 
   @override
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _typingAnimationController.dispose();
     super.dispose();
   }
 
@@ -36,6 +57,74 @@ class _HappyBotPageState extends State<HappyBotPage> {
     }
   }
 
+  Widget _buildTypingIndicator() {
+    return Container(
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+                bottomLeft: Radius.circular(4),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedBuilder(
+                  animation: _typingAnimation,
+                  builder: (context, child) {
+                    return Row(
+                      children: List.generate(3, (index) {
+                        final delay = index * 0.2;
+                        final animationValue = (_typingAnimation.value - delay).clamp(0.0, 1.0);
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                          child: Transform.scale(
+                            scale: 0.5 + (animationValue * 0.5),
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.3 + (animationValue * 0.7)),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'HappyBot is typing...',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -49,14 +138,15 @@ class _HappyBotPageState extends State<HappyBotPage> {
                   .addPostFrameCallback((_) => _scrollToBottom());
               return Stack(
                 children: [
-                  // Backdrop effect
+
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         image: DecorationImage(
                           image: const AssetImage('assets/icons/health.png'),
-                          fit: BoxFit.cover,
+                          fit: BoxFit.none,
+                          alignment: Alignment.center,
                           colorFilter: ColorFilter.mode(
                             Colors.white.withOpacity(0.9),
                             BlendMode.lighten,
@@ -110,12 +200,9 @@ class _HappyBotPageState extends State<HappyBotPage> {
                     ),
                   ),
 
-                  // Main Content
                   Column(
                     children: [
-                      // Header with enhanced design
-                      // Replace the existing header Container in your HappyBotPage with this:
-
+                      // Header
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -143,18 +230,6 @@ class _HappyBotPageState extends State<HappyBotPage> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.psychology,
-                                      color: Colors.white,
-                                      size: 22,
-                                    ),
-                                  ),
                                   const SizedBox(width: 10),
                                   const Text(
                                     "Happy Bot",
@@ -188,15 +263,24 @@ class _HappyBotPageState extends State<HappyBotPage> {
                             borderRadius: BorderRadius.circular(20),
                             child: BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: ListView.builder(
-                                controller: _scrollController,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 16),
-                                itemCount: viewModel.messages.length,
-                                itemBuilder: (context, index) {
-                                  final message = viewModel.messages[index];
-                                  return MessageBubble(message: message);
-                                },
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: ListView.builder(
+                                      controller: _scrollController,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 16),
+                                      itemCount: viewModel.messages.length,
+                                      itemBuilder: (context, index) {
+                                        final message = viewModel.messages[index];
+                                        return MessageBubble(message: message);
+                                      },
+                                    ),
+                                  ),
+                                  // Show typing indicator when bot is typing
+                                  // You'll need to add an isTyping property to your ChatViewModel
+                                  if (viewModel.isTyping) _buildTypingIndicator(),
+                                ],
                               ),
                             ),
                           ),
