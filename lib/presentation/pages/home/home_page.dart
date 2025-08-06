@@ -12,22 +12,21 @@ import 'package:mindcare/presentation/pages/stress_level/screens/stress_level_qu
 import 'package:mindcare/presentation/routes/app_routes.dart';
 
 class HomePage extends StatelessWidget {
-
- final User? user = FirebaseAuth.instance.currentUser;
+  final User? user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
-  backgroundColor: Colors.black,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(50),
-  ),
-  onPressed: () {
-    Navigator.pushNamed(context, AppRoutes.moodDetector);
-  },
-  child: const Icon(Icons.emoji_emotions, color: Colors.white),
-),
+        backgroundColor: Colors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+        ),
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.moodDetector);
+        },
+        child: const Icon(Icons.emoji_emotions, color: Colors.white),
+      ),
       body: Stack(
         children: [
           // Beautiful white backdrop with subtle patterns
@@ -39,7 +38,8 @@ class HomePage extends StatelessWidget {
           // Main content
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -65,7 +65,7 @@ class HomePage extends StatelessWidget {
         child: InkWell(
           onTap: () {
             // Navigate to settings or show modal
-           Navigator.pushNamed(context, AppRoutes.settings1);
+            Navigator.pushNamed(context, AppRoutes.settings1);
           },
           borderRadius: BorderRadius.circular(20),
           child: Ink(
@@ -121,12 +121,12 @@ class HomePage extends StatelessWidget {
       children: [
         _buildElevatedCard(
           child: HomeCardButton(
-            label: "Relax My Mind",
-            leftIcon: Icons.arrow_forward_ios,
-            rightImageAsset: 'assets/icons/mindfulness1.png',
-            leftBackgroundColor: const Color(0xFF0057B2),
-            onTap: () => Navigator.pushNamed(context, AppRoutes.relaxMindDash)
-          ),
+              label: "Relax My Mind",
+              leftIcon: Icons.arrow_forward_ios,
+              rightImageAsset: 'assets/icons/mindfulness1.png',
+              leftBackgroundColor: const Color(0xFF0057B2),
+              onTap: () =>
+                  Navigator.pushNamed(context, AppRoutes.relaxMindDash)),
         ),
         const SizedBox(height: 16),
         _buildElevatedCard(
@@ -135,30 +135,27 @@ class HomePage extends StatelessWidget {
             leftImageAsset: 'assets/icons/stress_level.png',
             rightIcon: Icons.analytics,
             rightBackgroundColor: const Color(0xFF008450),
-            onTap: () => {
-              Navigator.pushNamed(context, AppRoutes.stressLevelQuiz)
-            },
+            onTap: () =>
+                {Navigator.pushNamed(context, AppRoutes.stressLevelQuiz)},
           ),
         ),
         const SizedBox(height: 16),
         _buildElevatedCard(
           child: HomeCardButton(
-            label: "Happy Bot",
-            leftText: "Ask",
-            rightImageAsset: 'assets/icons/Bot1.png',
-            leftBackgroundColor: const Color(0xFF0057B2),
-            onTap: () => Navigator.pushNamed(context, AppRoutes.happyBot)
-          ),
+              label: "Happy Bot",
+              leftText: "Ask",
+              rightImageAsset: 'assets/icons/Bot1.png',
+              leftBackgroundColor: const Color(0xFF0057B2),
+              onTap: () => Navigator.pushNamed(context, AppRoutes.happyBot)),
         ),
         const SizedBox(height: 16),
         _buildElevatedCard(
           child: HomeCardButton(
-            label: "Extras",
-            leftImageAsset: 'assets/icons/Extra1.png',
-            rightIcon: Icons.arrow_forward,
-            rightBackgroundColor: const Color(0xFF008450),
-            onTap: () => Navigator.pushNamed(context, AppRoutes.extrasDash)
-          ),
+              label: "Extras",
+              leftImageAsset: 'assets/icons/Extra1.png',
+              rightIcon: Icons.arrow_forward,
+              rightBackgroundColor: const Color(0xFF008450),
+              onTap: () => Navigator.pushNamed(context, AppRoutes.extrasDash)),
         ),
       ],
     );
@@ -184,7 +181,8 @@ class HomePage extends StatelessWidget {
   }
 
   void _showSnack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -194,7 +192,8 @@ class BackdropPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // Base white background
     Paint backgroundPaint = Paint()..color = Colors.white;
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), backgroundPaint);
+    canvas.drawRect(
+        Rect.fromLTWH(0, 0, size.width, size.height), backgroundPaint);
 
     // Create subtle pattern
     Paint patternPaint = Paint()
@@ -215,7 +214,7 @@ class BackdropPainter extends CustomPainter {
     Paint bottomPatternPaint = Paint()
       ..color = Colors.blue.shade50.withOpacity(0.2)
       ..style = PaintingStyle.fill;
-    
+
     for (int i = 0; i < 3; i++) {
       double radius = 100 + i * 40;
       canvas.drawCircle(
@@ -233,18 +232,14 @@ class BackdropPainter extends CustomPainter {
 
     Path path = Path();
     path.moveTo(size.width * 0.8, 0);
-    path.quadraticBezierTo(
-      size.width * 0.2, size.height * 0.3,
-      size.width * 0.7, size.height * 0.5
-    );
+    path.quadraticBezierTo(size.width * 0.2, size.height * 0.3,
+        size.width * 0.7, size.height * 0.5);
     canvas.drawPath(path, linePaint);
-    
+
     Path path2 = Path();
     path2.moveTo(0, size.height * 0.7);
     path2.quadraticBezierTo(
-      size.width * 0.5, size.height * 0.8,
-      size.width * 0.3, size.height
-    );
+        size.width * 0.5, size.height * 0.8, size.width * 0.3, size.height);
     canvas.drawPath(path2, linePaint);
   }
 

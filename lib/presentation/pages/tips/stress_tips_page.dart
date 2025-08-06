@@ -5,7 +5,7 @@ import 'package:mindcare/presentation/pages/tips/data/tips_data.dart';
 enum Language { english, sinhala, tamil }
 
 class StressTipsPage extends StatefulWidget {
-  final String? stressLevel; // Optional: to generate targeted tips
+  final String? stressLevel; 
   final Language? preferredLanguage;
   
   const StressTipsPage({
@@ -578,7 +578,7 @@ class _StressTipsPageState extends State<StressTipsPage>
           case 'mental': return 'මානසික';
           case 'sleep': return 'නින්ද';
           case 'breathing': return 'ශ්වසන';
-          case 'mindfulness': return 'සිහිකල්ල';
+          case 'mindfulness': return 'සිහිකල්පනාව';
           default: return category;
         }
       case Language.tamil:

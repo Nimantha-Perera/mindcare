@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:mindcare/presentation/pages/admins/admin_dash.dart';
 import 'package:mindcare/presentation/pages/authentications/service/authfirestore.dart';
 import 'package:mindcare/presentation/pages/home/home_page.dart';
-// Import your UserService
-// import 'package:mindcare/services/user_service.dart';
+// Import your admin page
+// import 'package:mindcare/presentation/pages/admin/admin_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -49,6 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final User? user = userCredential.user;
 
       if (user != null) {
+        // Create or update user in Firestore
         await userService.createOrUpdateUser(
           uid: user.uid,
           email: user.email ?? '',
@@ -59,13 +61,23 @@ class _LoginScreenState extends State<LoginScreen> {
             'isEmailVerified': user.emailVerified,
           },
         );
-      }
 
-      // Navigate to home screen after successful login
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => HomePage()),
-        );
+        // Get user role from Firestore
+        final String? userRole = await userService.getUserRole(user.uid);
+
+        // Navigate based on role
+        if (mounted) {
+          if (userRole == 'admin') {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => AdminDashboard()),
+            );
+          } else {
+            // Default to home page for regular users or if role is not set
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => HomePage()),
+            );
+          }
+        }
       }
     } catch (error) {
       print("Google Sign-In error: $error");
@@ -198,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             
-            // Full screen loader overlay (optional - for more prominent loading state)
+            // Full screen loader overlay
             if (_isLoading)
               Container(
                 color: Colors.black.withOpacity(0.3),

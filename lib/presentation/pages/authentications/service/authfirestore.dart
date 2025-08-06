@@ -79,8 +79,9 @@ class UserService {
         // Update existing user
         await userRef.update(userData);
       } else {
-        // Create new user
+        // Create new user with default role
         userData['createdAt'] = FieldValue.serverTimestamp();
+        userData['role'] = userData['role'] ?? 'user'; // Default role is 'user'
         await userRef.set(userData);
       }
       
@@ -104,5 +105,126 @@ class UserService {
   // Get current Firebase Auth user
   User? getCurrentFirebaseUser() {
     return _auth.currentUser;
+  }
+
+  // Get user role by UID
+  Future<String?> getUserRole(String uid) async {
+    try {
+      final DocumentSnapshot userDoc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .get();
+
+      if (userDoc.exists) {
+        final data = userDoc.data() as Map<String, dynamic>?;
+        return data?['role'] as String?;
+      }
+      return null;
+    } catch (e) {
+      print('Error getting user role: $e');
+      return null;
+    }
+  }
+
+  // Get current user's role
+  Future<String?> getCurrentUserRole() async {
+    try {
+      final String? uid = getCurrentUserUid();
+      if (uid != null) {
+        return await getUserRole(uid);
+      }
+      return null;
+    } catch (e) {
+      print('Error getting current user role: $e');
+      return null;
+    }
+  }
+
+  // Set user role (for admin management)
+  Future<bool> setUserRole(String uid, String role) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'role': role,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      return true;
+    } catch (e) {
+      print('Error setting user role: $e');
+      return false;
+    }
+  }
+
+  // Check if current user is admin
+  Future<bool> isCurrentUserAdmin() async {
+    final String? role = await getCurrentUserRole();
+    return role == 'admin';
+  }
+
+  // Get all users (admin function)
+  Future<List<Map<String, dynamic>>> getAllUsers() async {
+    try {
+      final QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['uid'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error getting all users: $e');
+      return [];
+    }
+  }
+
+  // Get users by role
+  Future<List<Map<String, dynamic>>> getUsersByRole(String role) async {
+    try {
+      final QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: role)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['uid'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error getting users by role: $e');
+      return [];
+    }
+  }
+
+  // Update user profile
+  Future<bool> updateUserProfile({
+    required String uid,
+    Map<String, dynamic>? updates,
+  }) async {
+    try {
+      if (updates != null && updates.isNotEmpty) {
+        updates['updatedAt'] = FieldValue.serverTimestamp();
+        await _firestore.collection('users').doc(uid).update(updates);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error updating user profile: $e');
+      return false;
+    }
+  }
+
+  // Delete user (admin function)
+  Future<bool> deleteUser(String uid) async {
+    try {
+      await _firestore.collection('users').doc(uid).delete();
+      return true;
+    } catch (e) {
+      print('Error deleting user: $e');
+      return false;
+    }
   }
 }

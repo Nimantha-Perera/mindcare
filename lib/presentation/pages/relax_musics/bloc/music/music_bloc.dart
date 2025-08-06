@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:just_audio/just_audio.dart';
 
 class Music {
@@ -8,13 +7,6 @@ class Music {
   final String url;
 
   Music({required this.name, required this.url});
-
-  factory Music.fromJson(Map<String, dynamic> json) {
-    return Music(
-      name: json['name'] ?? '',
-      url: json['url'] ?? '',
-    );
-  }
 }
 
 class MusicBloc with ChangeNotifier {
@@ -26,9 +18,6 @@ class MusicBloc with ChangeNotifier {
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   String _searchQuery = '';
-
-  // Replace this with your actual API endpoint
-  final String apiUrl = 'https://backend-m4yq.vercel.app/api/musics';
 
   List<Music> get allMusics => _allMusics;
   List<Music> get filteredMusics => _filteredMusics;
@@ -64,36 +53,35 @@ class MusicBloc with ChangeNotifier {
   }
 
   void _initialize() {
-    loadMusics();
+    loadMusicsFromFirebase();
   }
 
-  Future<void> loadMusics() async {
+  Future<void> loadMusicsFromFirebase() async {
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      final ListResult result =
+          await FirebaseStorage.instance.ref('musics').listAll();
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonData = json.decode(response.body);
-        final List<dynamic> musicsJson = jsonData['musics'] ?? [];
-        _allMusics = musicsJson.map((data) => Music.fromJson(data)).toList();
-        _filteredMusics = List.from(_allMusics);
-        notifyListeners();
-      } else {
-        throw Exception('Failed to load musics: ${response.statusCode}');
+      List<Music> musics = [];
+
+      for (Reference ref in result.items) {
+        final String url = await ref.getDownloadURL();
+        final String name = ref.name;
+
+        musics.add(Music(name: name, url: url));
       }
+
+      _allMusics = musics;
+      _filteredMusics = List.from(_allMusics);
+      notifyListeners();
     } catch (e) {
-      print('Failed to load musics: $e');
+      print('Failed to load musics from Firebase: $e');
     }
   }
+
   Future<void> refreshMusics() async {
-  // Option 1: If you're loading from a local list
-  filterMusics(_searchQuery);
-
-  // Option 2: If you're fetching from a remote source
-  // _allMusics = await YourMusicRepository().fetchMusics();
-  // filterMusics(_searchQuery);
-  notifyListeners();
-}
-
+    filterMusics(_searchQuery);
+    notifyListeners();
+  }
 
   void filterMusics(String query) {
     _searchQuery = query;
@@ -101,7 +89,8 @@ class MusicBloc with ChangeNotifier {
       _filteredMusics = List.from(_allMusics);
     } else {
       _filteredMusics = _allMusics
-          .where((music) => music.name.toLowerCase().contains(query.toLowerCase()))
+          .where((music) =>
+              music.name.toLowerCase().contains(query.toLowerCase()))
           .toList();
     }
     notifyListeners();
@@ -153,11 +142,12 @@ class MusicBloc with ChangeNotifier {
   }
 
   String formatMusicName(String name) {
-    final formattedName = name.replaceAll('_', ' ').replaceAll('-', ' ');
+    final formattedName =
+        name.replaceAll('_', ' ').replaceAll('-', ' ').replaceAll('.mp3', '');
     return formattedName
         .split(' ')
-        .map((word) => word.isNotEmpty 
-            ? word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase() 
+        .map((word) => word.isNotEmpty
+            ? word[0].toUpperCase() + word.substring(1).toLowerCase()
             : '')
         .join(' ');
   }
