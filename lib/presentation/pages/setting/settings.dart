@@ -16,27 +16,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _handleLogout(BuildContext context) async {
     // Show confirmation dialog
     final bool confirm = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout Confirmation'),
-        content: const Text('Are you sure you want to logout?'),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Logout Confirmation'),
+            content: const Text('Are you sure you want to logout?'),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child:
+                    const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                child:
+                    const Text('Logout', style: TextStyle(color: Colors.white)),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Logout', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
 
     if (confirm) {
       await FirebaseAuth.instance.signOut();
@@ -55,7 +60,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         builder: (context) => const EditProfileScreen(),
       ),
     );
-    
+
     // Refresh the screen if profile was updated
     if (result == true) {
       setState(() {
@@ -67,7 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
-    
+
     // Set system UI overlay style for full immersive experience
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -99,7 +104,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     // Top header section
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 12.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -118,37 +124,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ],
                               ),
-                              child: const Icon(Icons.arrow_back_ios_new, color: Colors.teal, size: 18),
+                              child: const Icon(Icons.arrow_back_ios_new,
+                                  color: Colors.teal, size: 18),
                             ),
                           ),
-                          const Text(
-                            'Profile Settings',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.teal,
-                            ),
-                          ),
+
                           // Settings action button
-                          Container(
-                            padding: const EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(Icons.more_vert, color: Colors.teal, size: 18),
-                          ),
                         ],
                       ),
                     ),
-                    
+
+                    const Text(
+                      'Profile Settings',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
+                    ),
+
                     Expanded(
                       child: SingleChildScrollView(
                         physics: const BouncingScrollPhysics(),
@@ -157,7 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Column(
                             children: [
                               const SizedBox(height: 20),
-                              
+
                               // Profile Picture with enhanced decorative border
                               Stack(
                                 alignment: Alignment.bottomRight,
@@ -167,7 +161,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       gradient: LinearGradient(
-                                        colors: [Colors.teal.shade300, Colors.teal.shade700],
+                                        colors: [
+                                          Colors.teal.shade300,
+                                          Colors.teal.shade700
+                                        ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
@@ -180,16 +177,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       ],
                                     ),
                                     child: user.photoURL != null
-                                      ? CircleAvatar(
-                                          radius: 60,
-                                          backgroundColor: Colors.white,
-                                          backgroundImage: NetworkImage(user.photoURL!),
-                                        )
-                                      : CircleAvatar(
-                                          radius: 60,
-                                          backgroundColor: Colors.white,
-                                          child: Icon(Icons.person, size: 60, color: Colors.teal.shade300),
-                                        ),
+                                        ? CircleAvatar(
+                                            radius: 60,
+                                            backgroundColor: Colors.white,
+                                            backgroundImage:
+                                                NetworkImage(user.photoURL!),
+                                          )
+                                        : CircleAvatar(
+                                            radius: 60,
+                                            backgroundColor: Colors.white,
+                                            child: Icon(Icons.person,
+                                                size: 60,
+                                                color: Colors.teal.shade300),
+                                          ),
                                   ),
                                   // Edit profile picture button
                                   InkWell(
@@ -199,10 +199,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       decoration: BoxDecoration(
                                         color: Colors.teal,
                                         shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white, width: 2),
+                                        border: Border.all(
+                                            color: Colors.white, width: 2),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
+                                            color:
+                                                Colors.black.withOpacity(0.1),
                                             blurRadius: 5,
                                           ),
                                         ],
@@ -216,9 +218,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ],
                               ),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // User Info Card - Enhanced
                               Container(
                                 padding: const EdgeInsets.all(24),
@@ -238,20 +240,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     Text(
                                       user.displayName ?? 'No Name',
                                       style: const TextStyle(
-                                        fontSize: 24, 
+                                        fontSize: 24,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.email_outlined, size: 18, color: Colors.grey),
+                                        const Icon(Icons.email_outlined,
+                                            size: 18, color: Colors.grey),
                                         const SizedBox(width: 8),
                                         Text(
                                           user.email ?? 'No Email',
                                           style: const TextStyle(
-                                            color: Colors.grey, 
+                                            color: Colors.grey,
                                             fontSize: 16,
                                           ),
                                         ),
@@ -264,9 +268,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         backgroundColor: Colors.teal.shade50,
                                         foregroundColor: Colors.teal,
                                         elevation: 0,
-                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 24, vertical: 12),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                       ),
                                       child: const Text('Edit Profile'),
@@ -274,14 +280,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ],
                                 ),
                               ),
-                              
+
                               const SizedBox(height: 30),
-                              
+
                               // Section Title
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 12.0, bottom: 12.0),
+                                  padding: const EdgeInsets.only(
+                                      left: 12.0, bottom: 12.0),
                                   child: Text(
                                     'Account Settings',
                                     style: TextStyle(
@@ -292,7 +299,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                               ),
-                              
+
                               // Settings Options - Enhanced with description
                               // _buildSettingItemWithDescription(
                               //   icon: Icons.notifications_outlined,
@@ -300,26 +307,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               //   description: 'Manage your app notifications',
                               //   onTap: () {},
                               // ),
-                              
+
                               _buildSettingItemWithDescription(
                                 icon: Icons.privacy_tip_outlined,
                                 title: 'Privacy',
                                 description: 'Control your privacy settings',
                                 onTap: () {},
                               ),
-                              
+
                               // _buildSettingItemWithDescription(
                               //   icon: Icons.security_outlined,
                               //   title: 'Security',
                               //   description: 'Password and account protection',
                               //   onTap: () {},
                               // ),
-                              
+
                               // Section Title
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 12.0, top: 20.0, bottom: 12.0),
+                                  padding: const EdgeInsets.only(
+                                      left: 12.0, top: 20.0, bottom: 12.0),
                                   child: Text(
                                     'Support',
                                     style: TextStyle(
@@ -330,27 +338,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                               ),
-                              
+
                               _buildSettingItemWithDescription(
                                 icon: Icons.help_outline,
                                 title: 'Help & Support',
                                 description: 'Get help or contact support',
                                 onTap: () {},
                               ),
-                              
+
                               _buildSettingItemWithDescription(
                                 icon: Icons.info_outline,
                                 title: 'About',
                                 description: 'Learn more about our app',
                                 onTap: () {},
                               ),
-                              
+
                               const SizedBox(height: 40),
-                              
+
                               // Logout Button - Enhanced with larger touch area
                               ElevatedButton.icon(
                                 onPressed: () => _handleLogout(context),
-                                icon: const Icon(Icons.logout, color: Colors.white, size: 22),
+                                icon: const Icon(Icons.logout,
+                                    color: Colors.white, size: 22),
                                 label: const Text(
                                   'Logout',
                                   style: TextStyle(
@@ -366,10 +375,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(18),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                 ),
                               ),
-                              
+
                               const SizedBox(height: 40),
                             ],
                           ),
@@ -382,7 +392,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
     );
   }
-  
+
   // Helper method to create setting item with description
   Widget _buildSettingItemWithDescription({
     required IconData icon,
