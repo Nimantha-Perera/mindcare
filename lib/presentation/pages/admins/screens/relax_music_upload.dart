@@ -643,7 +643,7 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
               Navigator.pop(context);
               if (successCount > 0) {
                 _clearFiles();
-                _tabController.animateTo(1); // Switch to library tab
+                _tabController.animateTo(1);
               }
             },
             child: const Text('OK'),

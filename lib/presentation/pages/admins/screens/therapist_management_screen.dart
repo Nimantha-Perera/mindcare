@@ -71,6 +71,195 @@ class _TherapistManagementScreenState extends State<TherapistManagementScreen> {
     }
   }
 
+  Future<void> _showAddTherapistDialog() async {
+    final nameController = TextEditingController();
+    final specialtyController = TextEditingController();
+    final aboutController = TextEditingController();
+    final profileImageController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add New Therapist'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: specialtyController,
+                decoration: const InputDecoration(
+                  labelText: 'Specialty',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: aboutController,
+                decoration: const InputDecoration(
+                  labelText: 'About',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: profileImageController,
+                decoration: const InputDecoration(
+                  labelText: 'Profile Image URL (optional)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (nameController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a name')),
+                );
+                return;
+              }
+
+              try {
+                await _firestore.collection('doctors').add({
+                  'name': nameController.text.trim(),
+                  'specialty': specialtyController.text.trim().isEmpty 
+                      ? 'Not specified' 
+                      : specialtyController.text.trim(),
+                  'about': aboutController.text.trim().isEmpty 
+                      ? 'No description' 
+                      : aboutController.text.trim(),
+                  'profileImage': profileImageController.text.trim(),
+                  'availability': {}, // Empty availability object
+                  'createdAt': FieldValue.serverTimestamp(),
+                });
+
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Therapist added successfully')),
+                );
+                _loadTherapists();
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error adding therapist: $e')),
+                );
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showEditTherapistDialog(Map<String, dynamic> therapist) async {
+    final nameController = TextEditingController(text: therapist['name'] ?? '');
+    final specialtyController = TextEditingController(text: therapist['specialty'] ?? '');
+    final aboutController = TextEditingController(text: therapist['about'] ?? '');
+    final profileImageController = TextEditingController(text: therapist['profileImage'] ?? '');
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Therapist'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: specialtyController,
+                decoration: const InputDecoration(
+                  labelText: 'Specialty',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: aboutController,
+                decoration: const InputDecoration(
+                  labelText: 'About',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: profileImageController,
+                decoration: const InputDecoration(
+                  labelText: 'Profile Image URL (optional)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (nameController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a name')),
+                );
+                return;
+              }
+
+              try {
+                await _firestore.collection('doctors').doc(therapist['id']).update({
+                  'name': nameController.text.trim(),
+                  'specialty': specialtyController.text.trim().isEmpty 
+                      ? 'Not specified' 
+                      : specialtyController.text.trim(),
+                  'about': aboutController.text.trim().isEmpty 
+                      ? 'No description' 
+                      : aboutController.text.trim(),
+                  'profileImage': profileImageController.text.trim(),
+                  'updatedAt': FieldValue.serverTimestamp(),
+                });
+
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Therapist updated successfully')),
+                );
+                _loadTherapists();
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error updating therapist: $e')),
+                );
+              }
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,12 +299,21 @@ class _TherapistManagementScreenState extends State<TherapistManagementScreen> {
                       isThreeLine: true,
                       trailing: PopupMenuButton<String>(
                         onSelected: (value) {
-                          if (value == 'delete') {
+                          if (value == 'edit') {
+                            _showEditTherapistDialog(therapist);
+                          } else if (value == 'delete') {
                             _deleteTherapist(id);
                           }
                         },
                         itemBuilder: (context) => [
-                          const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                          const PopupMenuItem(value: 'edit', child: ListTile(
+                            leading: Icon(Icons.edit, color: Colors.blue),
+                            title: Text('Edit'),
+                          )),
+                          const PopupMenuItem(value: 'delete', child: ListTile(
+                            leading: Icon(Icons.delete, color: Colors.red),
+                            title: Text('Delete'),
+                          )),
                         ],
                       ),
                     ),
@@ -123,6 +321,11 @@ class _TherapistManagementScreenState extends State<TherapistManagementScreen> {
                 },
               ),
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddTherapistDialog,
+        backgroundColor: Colors.teal,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
