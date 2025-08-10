@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mindcare/presentation/pages/breathing/breathing.dart';
 import 'package:mindcare/presentation/pages/home/widgets/home_card.dart';
+import 'package:mindcare/presentation/routes/app_routes.dart';
 
 import '../relax_musics/relax_musics_page.dart';
 
@@ -130,6 +131,16 @@ class RelaxMyMindDashboard extends StatelessWidget {
               context,
               MaterialPageRoute(builder: (_) => RelaxMusicsPage()),),
             
+          }
+        ),
+        const SizedBox(height: 20),
+        HomeCardButton(
+          label: "Relax Mind Tips",
+          leftIcon: Icons.tips_and_updates,
+          rightImageAsset: 'assets/icons/lamp.png',
+          leftBackgroundColor: const Color(0xFF0057B2),
+          onTap: () => {
+             Navigator.pushNamed(context, AppRoutes.stressTipsPage)
           }
         ),
       ],

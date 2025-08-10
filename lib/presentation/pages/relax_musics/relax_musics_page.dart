@@ -76,7 +76,7 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 16.0 : 24.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+       
         boxShadow: [
           BoxShadow(
             color: Colors.grey.shade200,

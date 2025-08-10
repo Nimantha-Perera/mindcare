@@ -7,7 +7,7 @@ buildscript {
     dependencies {
         // This is the Android Gradle Plugin version.
         // Update it to 8.3.0 to resolve the warning you previously saw.
-        classpath 'com.android.tools.build:gradle:8.3.0'
+         classpath 'com.android.tools.build:gradle:8.6.0'
 
         // This is the Google Services plugin.
         // It's crucial for Firebase. Ensure you have the latest stable version.

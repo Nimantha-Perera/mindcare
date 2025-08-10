@@ -10,8 +10,7 @@ import 'package:mindcare/presentation/cubit/doctor_cubit.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  //! Features - Doctor Channel
-  // Cubit
+
   sl.registerFactory(
     () => DoctorCubit(
       getDoctorsUseCase: sl(),
@@ -22,23 +21,22 @@ Future<void> init() async {
     ),
   );
 
-  // Use cases
+
   sl.registerLazySingleton(() => GetDoctorsUseCase(sl()));
   sl.registerLazySingleton(() => GetUserDoctorsUseCase(sl()));
   sl.registerLazySingleton(() => AddToUserDoctorsUseCase(sl()));
   sl.registerLazySingleton(() => RemoveFromUserDoctorsUseCase(sl()));
   sl.registerLazySingleton(() => CheckDoctorInUserListUseCase(sl()));
 
-  // Repository
+
   sl.registerLazySingleton<DoctorRepository>(
     () => DoctorRepositoryImpl(sl()),
   );
 
-  // Data sources
   sl.registerLazySingleton<FirestoreDoctorDataSource>(
     () => FirestoreDoctorDataSourceImpl(firestore: sl()),
   );
 
-  //! External
+
   sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
 }
