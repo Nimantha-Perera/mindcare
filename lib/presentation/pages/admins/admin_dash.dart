@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mindcare/presentation/pages/admins/screens/relax_music_upload.dart';
 import 'package:mindcare/presentation/pages/admins/screens/therapist_management_screen.dart';
 import 'package:mindcare/presentation/pages/admins/screens/user_manegment.dart';
 import 'package:mindcare/presentation/pages/authentications/login.dart';
@@ -20,6 +21,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   int _userCount = 0;
   int _doctorCount = 0;
+  int _musicCount = 0; // Added music count
 
   final List<Widget> _screens = const [
     Placeholder(), 
@@ -52,10 +54,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
     try {
       final usersSnap = await FirebaseFirestore.instance.collection('users').get();
       final doctorsSnap = await FirebaseFirestore.instance.collection('doctors').get();
-
+      
+      // Load music count from Firebase Storage (you might need to adjust this based on your storage structure)
+      // For now, we'll set it to 0 and update it when needed
       setState(() {
         _userCount = usersSnap.docs.length;
         _doctorCount = doctorsSnap.docs.length;
+        _musicCount = 0; // You can implement actual music count later
       });
     } catch (e) {
       print('Error fetching counts: $e');
@@ -97,41 +102,41 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildWelcomeSection(bool isTablet) {
-  return Card(
-    elevation: 0, 
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-      side: BorderSide(color: Colors.grey.shade300), 
-    ),
-    child: Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 32 : 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Welcome, $_adminName!',
-            style: TextStyle(
-              fontSize: isTablet ? 28 : 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          if (isTablet) ...[
-            const SizedBox(height: 8),
+    return Card(
+      elevation: 0, 
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300), 
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(isTablet ? 32 : 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              'Manage your MindCare platform from here',
+              'Welcome, $_adminName!',
               style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
+                fontSize: isTablet ? 28 : 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
+            if (isTablet) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Manage your MindCare platform from here',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildCounts(bool isTablet, bool isDesktop) {
     final cardSpacing = isDesktop ? 24.0 : 16.0;
@@ -158,6 +163,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   isTablet,
                 ),
               ),
+              SizedBox(width: cardSpacing),
+              Expanded(
+                child: _buildStatsCard(
+                  'Relax Music', 
+                  _musicCount, 
+                  Icons.music_note, 
+                  Colors.purple,
+                  isTablet,
+                ),
+              ),
             ],
           )
         : Column(
@@ -175,6 +190,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 _doctorCount, 
                 Icons.psychology, 
                 Colors.green,
+                isTablet,
+              ),
+              const SizedBox(height: 16),
+              _buildStatsCard(
+                'Relax Music', 
+                _musicCount, 
+                Icons.music_note, 
+                Colors.purple,
                 isTablet,
               ),
             ],
@@ -265,6 +288,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   () => _navigateTo(const TherapistManagementScreen()),
                   isTablet,
                 ),
+                _buildActionCard(
+                  'Upload Music',
+                  Icons.music_note,
+                  Colors.purple,
+                  () => _navigateTo(const RelaxMusicUploadScreen()),
+                  isTablet,
+                ),
                 if (isTablet) ...[
                   _buildActionCard(
                     'Reports',
@@ -277,7 +307,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     _buildActionCard(
                       'Settings',
                       Icons.settings,
-                      Colors.purple,
+                      Colors.grey,
                       () => {}, // Add navigation
                       isTablet,
                     ),
@@ -327,7 +357,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   void _navigateTo(Widget screen) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    Navigator.push(
+      context, 
+      MaterialPageRoute(builder: (_) => screen)
+    ).then((_) {
+      // Refresh counts when returning from music upload screen
+      _loadCounts();
+    });
   }
 
   void _handleLogout() {
@@ -394,6 +430,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       bottomNavigationBar: isDesktop
           ? null
           : BottomNavigationBar(
+              type: BottomNavigationBarType.fixed, // Add this to show all items
               currentIndex: _selectedIndex,
               selectedItemColor: Colors.teal,
               unselectedItemColor: Colors.grey,
@@ -465,9 +502,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       _onItemTapped(2);
                     },
                   ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.music_note, color: Colors.purple),
+                    title: const Text('Upload Music'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _navigateTo(const RelaxMusicUploadScreen());
+                    },
+                  ),
                 ],
               ),
             ),
+      floatingActionButton: isDesktop 
+          ? FloatingActionButton.extended(
+              onPressed: () => _navigateTo(const RelaxMusicUploadScreen()),
+              backgroundColor: Colors.purple,
+              icon: const Icon(Icons.music_note),
+              label: const Text('Upload Music'),
+            )
+          : null,
     );
   }
 }
