@@ -166,8 +166,8 @@ class _CameraPreviewBoxState extends State<CameraPreviewBox> with SingleTickerPr
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Actual camera preview
-          CameraPreview(widget.controller!),
+          // Properly scaled camera preview
+          _buildScaledCameraPreview(),
           
           // Visual effects overlay (if enabled)
           if (widget.enableEffects)
@@ -185,6 +185,38 @@ class _CameraPreviewBoxState extends State<CameraPreviewBox> with SingleTickerPr
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildScaledCameraPreview() {
+    // Get the camera aspect ratio
+    final cameraAspectRatio = widget.controller!.value.aspectRatio;
+    
+    // Calculate proper scaling to maintain aspect ratio and fill the circle
+    final previewAspectRatio = cameraAspectRatio;
+    
+    // Since we want to fill a square (which will be clipped to circle),
+    // we need to scale the preview to cover the entire square
+    double scaleX = 1.0;
+    double scaleY = 1.0;
+    
+    if (previewAspectRatio > 1.0) {
+      // Landscape camera (wider than tall)
+      scaleY = previewAspectRatio;
+    } else {
+      // Portrait camera (taller than wide)
+      scaleX = 1.0 / previewAspectRatio;
+    }
+    
+    return Transform.scale(
+      scaleX: scaleX,
+      scaleY: scaleY,
+      child: Center(
+        child: AspectRatio(
+          aspectRatio: cameraAspectRatio,
+          child: CameraPreview(widget.controller!),
+        ),
       ),
     );
   }
