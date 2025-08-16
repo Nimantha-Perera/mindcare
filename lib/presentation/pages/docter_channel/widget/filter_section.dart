@@ -43,7 +43,7 @@ class FilterSection extends StatelessWidget {
           const SizedBox(height: 12),
           _buildSpecialtyFilters(),
           const SizedBox(height: 12),
-          _buildOnlineFilter(),
+          // _buildOnlineFilter(),
         ],
       ),
     );

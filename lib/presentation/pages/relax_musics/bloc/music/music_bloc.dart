@@ -14,6 +14,8 @@ class MusicBloc with ChangeNotifier {
   List<Music> _filteredMusics = [];
   int? _currentlyPlayingIndex;
   bool _isPlaying = false;
+  bool _isLoadingMusic = false; 
+  bool _isLoadingList = false; 
   final AudioPlayer _audioPlayer = AudioPlayer();
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
@@ -23,6 +25,8 @@ class MusicBloc with ChangeNotifier {
   List<Music> get filteredMusics => _filteredMusics;
   int? get currentlyPlayingIndex => _currentlyPlayingIndex;
   bool get isPlaying => _isPlaying;
+  bool get isLoadingMusic => _isLoadingMusic; 
+  bool get isLoadingList => _isLoadingList;
   Duration get duration => _duration;
   Duration get position => _position;
   AudioPlayer get audioPlayer => _audioPlayer;
@@ -58,6 +62,9 @@ class MusicBloc with ChangeNotifier {
 
   Future<void> loadMusicsFromFirebase() async {
     try {
+      _isLoadingList = true; 
+      notifyListeners();
+
       final ListResult result =
           await FirebaseStorage.instance.ref('musics').listAll();
 
@@ -72,15 +79,26 @@ class MusicBloc with ChangeNotifier {
 
       _allMusics = musics;
       _filteredMusics = List.from(_allMusics);
-      notifyListeners();
+      
     } catch (e) {
       print('Failed to load musics from Firebase: $e');
+    } finally {
+      _isLoadingList = false; 
+      notifyListeners();
     }
   }
 
   Future<void> refreshMusics() async {
-    filterMusics(_searchQuery);
+    _isLoadingList = true;
     notifyListeners();
+
+    try {
+      await loadMusicsFromFirebase();
+      filterMusics(_searchQuery);
+    } finally {
+      _isLoadingList = false;
+      notifyListeners();
+    }
   }
 
   void filterMusics(String query) {
@@ -100,6 +118,7 @@ class MusicBloc with ChangeNotifier {
     final music = _filteredMusics[index];
 
     if (_currentlyPlayingIndex == index) {
+      // Same music toggle play/pause
       if (_isPlaying) {
         await _audioPlayer.pause();
       } else {
@@ -108,22 +127,34 @@ class MusicBloc with ChangeNotifier {
       _isPlaying = !_isPlaying;
       notifyListeners();
     } else {
-      if (_isPlaying) {
-        await _audioPlayer.stop();
-      }
-
-      _position = Duration.zero;
-      _duration = Duration.zero;
-      notifyListeners();
-
+      // New music selected
       try {
+        _isLoadingMusic = true; 
+        notifyListeners();
+
+        // Stop current music if playing
+        if (_isPlaying) {
+          await _audioPlayer.stop();
+        }
+
+        // Reset position and duration
+        _position = Duration.zero;
+        _duration = Duration.zero;
+        _currentlyPlayingIndex = index; 
+        notifyListeners();
+
+        // Load and play new music
         await _audioPlayer.setUrl(music.url);
         await _audioPlayer.play();
-        _currentlyPlayingIndex = index;
         _isPlaying = true;
-        notifyListeners();
+        
       } catch (e) {
         print('Error playing music: $e');
+        _isPlaying = false;
+        _currentlyPlayingIndex = null; 
+      } finally {
+        _isLoadingMusic = false; 
+        notifyListeners();
       }
     }
   }
