@@ -4,6 +4,7 @@ import 'package:mindcare/presentation/pages/chatbot/happy_bot_page.dart';
 import 'package:mindcare/presentation/pages/extrass_dash/extrass_dash.dart';
 import 'package:mindcare/presentation/pages/mood_detector/mood_detecter.dart';
 import 'package:mindcare/presentation/pages/relax_mind_dash/relax_my_mind_dash.dart';
+import 'package:mindcare/presentation/pages/relax_musics/onboard_screen.dart';
 import 'package:mindcare/presentation/pages/relax_musics/relax_musics_page.dart';
 import 'package:mindcare/presentation/pages/setting/settings.dart';
 import 'package:mindcare/presentation/pages/stress_level/screens/stress_level_quiz.dart';
@@ -17,63 +18,74 @@ class AppRoutes {
   static const String moodDetector = '/mood-detector';
   static const String relaxMindDash = '/relax-mind-dash';
   static const String relaxMusics = '/relax-musics';
-  static const String settings1 = '/settings';  // Corrected: removed underscore
+  static const String relaxMusicsPage = '/relax-musics-page'; 
+  static const String settings1 = '/settings';
   static const String stressLevelQuiz = '/stress-level-quiz';
   static const String stressTipsPage = "/stress-tips-page";
 
   // Route generator function
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
+    final routeName = settings.name;
+    
+    switch (routeName) {
       case home:
         return MaterialPageRoute(
-          builder: (_) => HomePage(),  // Added const
+          builder: (_) => HomePage(),
           settings: settings,
         );
       
       case happyBot:
         return MaterialPageRoute(
-          builder: (_) => const HappyBotPage(),  // Added const
+          builder: (_) => const HappyBotPage(),
           settings: settings,
         );
       
       case extrasDash:
         return MaterialPageRoute(
-          builder: (_) => const ExtrasDashboard(),  // Added const
+          builder: (_) => const ExtrasDashboard(),
           settings: settings,
         );
       
       case moodDetector:
         return MaterialPageRoute(
-          builder: (_) => const FaceDetectionScreen(),  // Added const
+          builder: (_) => const FaceDetectionScreen(),
           settings: settings,
         );
       
       case relaxMindDash:
         return MaterialPageRoute(
-          builder: (_) => const RelaxMyMindDashboard(),  // Added const
+          builder: (_) => const RelaxMyMindDashboard(),
           settings: settings,
         );
       
       case relaxMusics:
+        // Always show onboarding before going to relax music
         return MaterialPageRoute(
-          builder: (_) => const RelaxMusicsPage(),  // Added const
+          builder: (_) => const OnboardingScreen(),
           settings: settings,
         );
       
-      case settings1:  // Corrected: updated to match constant name
+      case relaxMusicsPage:
         return MaterialPageRoute(
-          builder: (_) => const SettingsScreen(),  // Added const
+          builder: (_) => const RelaxMusicsPage(),
+          settings: settings,
+        );
+      
+      case settings1:
+        return MaterialPageRoute(
+          builder: (_) => const SettingsScreen(),
           settings: settings,
         );
       
       case stressLevelQuiz:
         return MaterialPageRoute(
-          builder: (_) => const StressLevelQuiz(),  // Added const
+          builder: (_) => const StressLevelQuiz(),
           settings: settings,
         );
+      
       case stressTipsPage:
         return MaterialPageRoute(
-          builder: (_) => const StressTipsPage(),  // Added const
+          builder: (_) => const StressTipsPage(),
           settings: settings,
         );
       
@@ -81,7 +93,7 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             body: Center(
-              child: Text('No route defined for ${settings.name}'),
+              child: Text('No route defined for ${routeName ?? "unknown route"}'),
             ),
           ),
         );

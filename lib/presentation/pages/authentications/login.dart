@@ -4,8 +4,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mindcare/presentation/pages/admins/admin_dash.dart';
 import 'package:mindcare/presentation/pages/authentications/service/authfirestore.dart';
 import 'package:mindcare/presentation/pages/home/home_page.dart';
-// Import your admin page
-// import 'package:mindcare/presentation/pages/admin/admin_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -16,6 +14,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
+  bool _keepMeLoggedIn = true; // Default to true for better UX
 
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     setState(() {
@@ -24,10 +23,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn();
+      
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        // User canceled the login
         setState(() {
           _isLoading = false;
         });
@@ -45,40 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final UserCredential userCredential = 
           await FirebaseAuth.instance.signInWithCredential(credential);
 
-      // Save user data to Firestore
-      final UserService userService = UserService();
-      final User? user = userCredential.user;
-
-      if (user != null) {
-        // Create or update user in Firestore
-        await userService.createOrUpdateUser(
-          uid: user.uid,
-          email: user.email ?? '',
-          name: user.displayName ?? '',
-          photoUrl: user.photoURL,
-          additionalData: {
-            'provider': 'google',
-            'isEmailVerified': user.emailVerified,
-          },
-        );
-
-        // Get user role from Firestore
-        final String? userRole = await userService.getUserRole(user.uid);
-
-        // Navigate based on role
-        if (mounted) {
-          if (userRole == 'admin') {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => AdminDashboard()),
-            );
-          } else {
-            // Default to home page for regular users or if role is not set
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => HomePage()),
-            );
-          }
-        }
-      }
+      await _handleUserAfterSignIn(userCredential, 'google');
     } catch (error) {
       print("Google Sign-In error: $error");
       if (mounted) {
@@ -91,6 +57,73 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           _isLoading = false;
         });
+      }
+    }
+  }
+
+  Future<void> _handleAnonymousSignIn(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final UserCredential userCredential = 
+          await FirebaseAuth.instance.signInAnonymously();
+      
+      await _handleUserAfterSignIn(userCredential, 'anonymous');
+    } catch (error) {
+      print("Anonymous Sign-In error: $error");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Anonymous sign in failed. Please try again.')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleUserAfterSignIn(UserCredential userCredential, String provider) async {
+    final UserService userService = UserService();
+    final User? user = userCredential.user;
+
+    if (user != null) {
+      // Firebase Auth automatically handles persistence on mobile platforms
+      // No need to call setPersistence() as it's web-only
+
+      // Create or update user in Firestore
+      await userService.createOrUpdateUser(
+        uid: user.uid,
+        email: user.email ?? '',
+        name: user.displayName ?? (provider == 'anonymous' ? 'Anonymous User' : ''),
+        photoUrl: user.photoURL,
+        additionalData: {
+          'provider': provider,
+          'isEmailVerified': user.emailVerified,
+          'isAnonymous': user.isAnonymous,
+          'lastLoginAt': DateTime.now().toIso8601String(),
+          'keepLoggedIn': _keepMeLoggedIn,
+        },
+      );
+
+      // Get user role from Firestore
+      final String? userRole = await userService.getUserRole(user.uid);
+
+      // Navigate based on role
+      if (mounted) {
+        if (userRole == 'admin') {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => AdminDashboard()),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => HomePage()),
+          );
+        }
       }
     }
   }
@@ -113,8 +146,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     width: 240,
                     height: 240,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE0E0E0),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE0E0E0),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -140,6 +173,42 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   
                   const Spacer(flex: 1),
+                  
+                  // Keep me logged in checkbox
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Checkbox(
+                          value: _keepMeLoggedIn,
+                          onChanged: (value) {
+                            setState(() {
+                              _keepMeLoggedIn = value ?? true;
+                            });
+                          },
+                          activeColor: const Color(0xFF424242),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _keepMeLoggedIn = !_keepMeLoggedIn;
+                            });
+                          },
+                          child: const Text(
+                            'Keep me logged in',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF424242),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   
                   // Google sign-in button
                   ElevatedButton(
@@ -175,7 +244,66 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(width: 12),
                               const Text(
-                                'Login With',
+                                'Login With Google',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // OR divider
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: Colors.grey.shade300)),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: TextStyle(
+                            color: Color(0xFF757575),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: Colors.grey.shade300)),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Anonymous sign-in button
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : () => _handleAnonymousSignIn(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF424242),
+                      foregroundColor: Colors.white,
+                      elevation: 1,
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.person_outline,
+                                size: 24,
+                              ),
+                              SizedBox(width: 12),
+                              Text(
+                                'Continue Anonymously',
                                 style: TextStyle(fontSize: 16),
                               ),
                             ],
@@ -185,8 +313,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   
                   // Supportive message
-                  Column(
-                    children: const [
+                  const Column(
+                    children: [
                       Text(
                         'Your thoughts are safe here.',
                         style: TextStyle(
@@ -204,6 +332,37 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
+                  
+                  // Note about keep logged in for anonymous users
+                  if (_keepMeLoggedIn)
+                    Container(
+                      margin: const EdgeInsets.only(top: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.blue.shade100),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: Colors.blue.shade600,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Your session will be remembered across app launches',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   
                   const Spacer(flex: 1),
                 ],
