@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mindcare/firebase_options.dart';
+import 'package:mindcare/presentation/pages/authentications/auth_wrapper.dart'; // Add this import
 import 'package:mindcare/presentation/pages/authentications/login.dart';
 import 'package:mindcare/presentation/pages/docter_channel/injection_container.dart' as di;
 import 'package:mindcare/presentation/pages/home/home_page.dart';
@@ -13,8 +14,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-   await di.init();
-    await Firebase.initializeApp(
+  await di.init();
+  await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await dotenv.load(fileName: ".env");
@@ -37,7 +38,10 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const LoginScreen(),
+        // Changed from LoginScreen() to AuthWrapper() for persistent login
+        home: const AuthWrapper(),
+        
+       
       ),
     );
   }
