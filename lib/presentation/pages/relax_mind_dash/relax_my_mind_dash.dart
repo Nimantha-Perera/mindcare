@@ -127,9 +127,7 @@ class RelaxMyMindDashboard extends StatelessWidget {
           rightIcon: Icons.headphones,
           rightBackgroundColor: const Color(0xFF008450),
           onTap: () => {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => RelaxMusicsPage()),),
+           Navigator.pushNamed(context, AppRoutes.relaxMusics)
             
           }
         ),

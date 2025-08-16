@@ -43,11 +43,14 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
     final isMobile = screenWidth <= 480;
     
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Relax Music"),
+      ),
       backgroundColor: Colors.grey.shade50,
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(screenWidth, isMobile),
+            // _buildHeader(screenWidth, isMobile),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(
