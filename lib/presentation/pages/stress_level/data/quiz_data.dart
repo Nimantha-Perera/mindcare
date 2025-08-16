@@ -625,20 +625,19 @@ extension QuizQuestionExtension on QuizQuestion {
     final lang = detectedLanguage;
     final questionLower = question.toLowerCase();
     
-    // Basic checks for cultural sensitivity
-    // This is a simplified version - you might want to expand this
+  
     switch (lang) {
       case QuizLanguage.sinhala:
-        // Check for respectful language in Sinhala context
+  
         return !questionLower.contains('පිස්සු') && 
                !questionLower.contains('අපරාධ'); 
       case QuizLanguage.tamil:
-        // Check for respectful language in Tamil context
+   
         return !questionLower.contains('பைத்தியம்') && 
                !questionLower.contains('குற்றம்');
       case QuizLanguage.english:
       default:
-        // Check for respectful language in English
+
         return !questionLower.contains('crazy') &&
                !questionLower.contains('insane') &&
                !questionLower.contains('mental');
