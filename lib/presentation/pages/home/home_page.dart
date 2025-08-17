@@ -13,6 +13,7 @@ import 'package:mindcare/presentation/routes/app_routes.dart';
 
 class HomePage extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,11 +94,26 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildGreeting() {
+    // Get the current time to determine greeting
+    final hour = DateTime.now().hour;
+    String greeting;
+    
+    if (hour < 12) {
+      greeting = 'Good Morning';
+    } else if (hour < 17) {
+      greeting = 'Good Afternoon';
+    } else {
+      greeting = 'Good Evening';
+    }
+
+    // Safely get user display name
+    String displayName = _getUserDisplayName();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hello Good Morning,',
+          'Hello $greeting,',
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -105,7 +121,7 @@ class HomePage extends StatelessWidget {
           ),
         ),
         Text(
-          user != null ? user!.displayName! : 'User',
+          displayName,
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -114,6 +130,33 @@ class HomePage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  // Helper method to safely get user display name
+  String _getUserDisplayName() {
+    if (user == null) {
+      return 'Guest';
+    }
+    
+    if (user!.isAnonymous) {
+      return 'Anonymous User';
+    }
+    
+    // Check displayName first
+    if (user!.displayName != null && user!.displayName!.isNotEmpty) {
+      return user!.displayName!;
+    }
+    
+    // Fallback to email (extract name part)
+    if (user!.email != null && user!.email!.isNotEmpty) {
+      return user!.email!.split('@')[0].replaceAll('.', ' ').toLowerCase()
+          .split(' ')
+          .map((word) => word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : '')
+          .join(' ');
+    }
+    
+    // Final fallback
+    return 'User';
   }
 
   Widget _buildCardList(BuildContext context) {

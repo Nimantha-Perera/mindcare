@@ -43,11 +43,14 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
     final isMobile = screenWidth <= 480;
     
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Relax Music"),
+      ),
       backgroundColor: Colors.grey.shade50,
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(screenWidth, isMobile),
+            // _buildHeader(screenWidth, isMobile),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(
@@ -76,7 +79,7 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 16.0 : 24.0),
       decoration: BoxDecoration(
-       
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.shade200,
@@ -175,6 +178,13 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
     return Consumer<MusicBloc>(
       builder: (context, musicBloc, _) {
         final index = musicBloc.currentlyPlayingIndex;
+        
+ 
+        if (musicBloc.isLoadingMusic && index != null) {
+          final loadingMusic = musicBloc.filteredMusics[index];
+          return _buildLoadingCard(loadingMusic, screenWidth, isMobile, isTablet);
+        }
+        
         if (index == null) return const SizedBox();
 
         final currentMusic = musicBloc.filteredMusics[index];
@@ -329,6 +339,103 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
     );
   }
 
+
+  Widget _buildLoadingCard(dynamic music, double screenWidth, bool isMobile, bool isTablet) {
+    return Container(
+      width: double.infinity,
+      constraints: BoxConstraints(
+        maxWidth: isTablet ? 800 : double.infinity,
+      ),
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            primaryColor.withOpacity(0.1),
+            primaryColor.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+        border: Border.all(color: primaryColor.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: isMobile ? 20 : 24,
+                height: isMobile ? 20 : 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                "Loading...",
+                style: TextStyle(
+                  color: primaryColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: isMobile ? 12 : 14,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: isMobile ? 8 : 12),
+          Text(
+            _musicBloc.formatMusicName(music.name),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isMobile ? 16 : 18,
+              color: Colors.grey.shade800,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: isMobile ? 16 : 20),
+          
+          // Loading progress bar
+          Column(
+            children: [
+              Row(
+                children: [
+                  Text(
+                    "Preparing music...",
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: isMobile ? 12 : 14,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                backgroundColor: Colors.grey.shade300,
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: isMobile ? 12 : 16),
+          
+          // Disabled control buttons during loading
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildDisabledButton(Icons.replay_10, isMobile),
+              SizedBox(width: isMobile ? 20 : 24),
+              _buildLoadingPlayButton(isMobile),
+              SizedBox(width: isMobile ? 20 : 24),
+              _buildDisabledButton(Icons.forward_10, isMobile),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildControlButton(IconData icon, double size, VoidCallback onPressed, bool isMobile) {
     return Container(
       width: isMobile ? 44 : 52,
@@ -371,6 +478,58 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
         icon: Icon(icon, size: isMobile ? 28 : 32),
         color: Colors.white,
         onPressed: onPressed,
+      ),
+    );
+  }
+
+
+  Widget _buildDisabledButton(IconData icon, bool isMobile) {
+    return Container(
+      width: isMobile ? 44 : 52,
+      height: isMobile ? 44 : 52,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey.shade200,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300,
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Icon(
+        icon,
+        size: isMobile ? 28 : 32,
+        color: Colors.grey.shade400,
+      ),
+    );
+  }
+
+  Widget _buildLoadingPlayButton(bool isMobile) {
+    return Container(
+      width: isMobile ? 56 : 64,
+      height: isMobile ? 56 : 64,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: primaryColor.withOpacity(0.7),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: SizedBox(
+          width: isMobile ? 24 : 28,
+          height: isMobile ? 24 : 28,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
       ),
     );
   }
@@ -435,6 +594,7 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
                 final music = musicBloc.filteredMusics[index];
                 final isCurrent = musicBloc.currentlyPlayingIndex == index;
                 final isPlaying = isCurrent && musicBloc.isPlaying;
+                final isLoading = musicBloc.isLoadingMusic && isCurrent;
 
                 return Padding(
                   padding: EdgeInsets.only(bottom: isMobile ? 8.0 : 12.0),
@@ -463,12 +623,12 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
-                        onTap: () => musicBloc.togglePlay(index),
+                        onTap: isLoading ? null : () => musicBloc.togglePlay(index), 
                         child: Padding(
                           padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
                           child: Row(
                             children: [
-                              // Music icon
+                              
                               Container(
                                 width: isMobile ? 40 : 48,
                                 height: isMobile ? 40 : 48,
@@ -478,11 +638,19 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
                                       ? primaryColor.withOpacity(0.1)
                                       : Colors.grey.shade100,
                                 ),
-                                child: Icon(
-                                  Icons.music_note,
-                                  color: isCurrent ? primaryColor : Colors.grey.shade600,
-                                  size: isMobile ? 20 : 24,
-                                ),
+                                child: isLoading 
+                                    ? Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.music_note,
+                                        color: isCurrent ? primaryColor : Colors.grey.shade600,
+                                        size: isMobile ? 20 : 24,
+                                      ),
                               ),
                               
                               SizedBox(width: isMobile ? 12 : 16),
@@ -505,7 +673,11 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
                                     if (isCurrent) ...[
                                       const SizedBox(height: 4),
                                       Text(
-                                        isPlaying ? 'Now playing' : 'Paused',
+                                        isLoading 
+                                            ? 'Loading...' 
+                                            : isPlaying 
+                                                ? 'Now playing' 
+                                                : 'Paused',
                                         style: TextStyle(
                                           fontSize: isMobile ? 12 : 14,
                                           color: primaryColor.withOpacity(0.7),
@@ -516,13 +688,15 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
                                 ),
                               ),
                               
-                              // Play/pause button
+                              // Play/pause button with loading state
                               Container(
                                 width: isMobile ? 44 : 52,
                                 height: isMobile ? 44 : 52,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: primaryColor,
+                                  color: isLoading 
+                                      ? primaryColor.withOpacity(0.7)
+                                      : primaryColor,
                                   boxShadow: [
                                     BoxShadow(
                                       color: primaryColor.withOpacity(0.3),
@@ -531,11 +705,22 @@ class _RelaxMusicsPageState extends State<RelaxMusicsPage> {
                                     ),
                                   ],
                                 ),
-                                child: Icon(
-                                  isPlaying ? Icons.pause : Icons.play_arrow,
-                                  color: Colors.white,
-                                  size: isMobile ? 24 : 28,
-                                ),
+                                child: isLoading 
+                                    ? Center(
+                                        child: SizedBox(
+                                          width: isMobile ? 20 : 24,
+                                          height: isMobile ? 20 : 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          ),
+                                        ),
+                                      )
+                                    : Icon(
+                                        isPlaying ? Icons.pause : Icons.play_arrow,
+                                        color: Colors.white,
+                                        size: isMobile ? 24 : 28,
+                                      ),
                               ),
                             ],
                           ),

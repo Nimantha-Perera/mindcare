@@ -140,8 +140,8 @@ class DoctorCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (doctor.isOnline) _buildOnlineBadge(isMobile: isMobile),
-                  SizedBox(width: isMobile ? 4 : 8),
+                  // if (doctor.isOnline) _buildOnlineBadge(isMobile: isMobile),
+                  // SizedBox(width: isMobile ? 4 : 8),
                   IconButton(
                     onPressed: isInUserList ? onRemoveFromFavorites : onAddToFavorites,
                     icon: Icon(
