@@ -123,7 +123,9 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
               tabs: const [
                 Tab(text: 'Find Doctors'),
                 Tab(text: 'My Doctors'),
-                Tab(text: 'My Appoiments',)
+                Tab(
+                  text: 'My Appoiments',
+                )
               ],
             ),
     );
@@ -168,18 +170,18 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
         icon: const Icon(Icons.search, color: Colors.white),
         onPressed: _toggleSearch,
       ),
-      IconButton(
-        icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-        onPressed: () {
-          // TODO: Implement notifications
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AppointmentSections(),
-            ),
-          );
-        },
-      ),
+      // IconButton(
+      //   icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+      //   onPressed: () {
+      //     // TODO: Implement notifications
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) => const AppointmentSections(),
+      //       ),
+      //     );
+      //   },
+      // ),
     ];
   }
 

@@ -480,17 +480,17 @@ class _AppointmentSectionsState extends State<AppointmentSections>
                         child: const Text('Cancel'),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => _rescheduleAppointment(appointment),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6A4C93),
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Reschedule'),
-                      ),
-                    ),
+                    // const SizedBox(width: 12),
+                    // Expanded(
+                    //   child: ElevatedButton(
+                    //     onPressed: () => _rescheduleAppointment(appointment),
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: const Color(0xFF6A4C93),
+                    //       foregroundColor: Colors.white,
+                    //     ),
+                    //     child: const Text('Reschedule'),
+                    //   ),
+                    // ),
                     if (appointment.meetingLink != null &&
                         appointment.meetingLink!.isNotEmpty) ...[
                       const SizedBox(width: 12),
