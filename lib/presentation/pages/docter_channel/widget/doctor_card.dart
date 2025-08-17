@@ -199,35 +199,10 @@ class DoctorCard extends StatelessWidget {
     final smallTextSize = isMobile ? 10.0 : 12.0;
 
     return Wrap(
-      spacing: isMobile ? 8 : 12,
-      runSpacing: 4,
+      // spacing: isMobile ? 8 : 12,
+      // runSpacing: 4,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.star,
-              size: isMobile ? 14 : 16,
-              color: Colors.amber,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '${doctor.rating}',
-              style: TextStyle(
-                fontSize: textSize,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '(${doctor.reviews} reviews)',
-              style: TextStyle(
-                fontSize: smallTextSize,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
+        
         Text(
           '${doctor.experience} years exp.',
           style: TextStyle(
