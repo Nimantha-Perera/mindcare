@@ -673,11 +673,13 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
     });
 
     try {
-      // Create appointment data
+      // Create appointment data with correct field names
       final appointmentData = {
-        'userId': user!.uid,
+        // Fixed field names to match AppointmentSections expectations
+        'patientId': user!.uid,  // Changed from 'userId' to 'patientId'
+        'userId': user!.uid,     // Keep both for compatibility
         'userEmail': user!.email,
-        'doctorId': widget.doctor.name, // You should use actual doctor ID
+        'doctorId': widget.doctor.id ?? widget.doctor.name, // Use actual doctor ID if available
         'doctorName': widget.doctor.name,
         'doctorSpecialty': widget.doctor.specialty,
         'doctorImage': widget.doctor.profileImage,
@@ -691,11 +693,14 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
         'appointmentTime': '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}',
         'symptoms': _symptomsController.text.trim(),
         'isEmergency': _isEmergency,
-        'consultationFee': widget.doctor.consultationFee,
-        'status': 'pending', // pending, confirmed, completed, cancelled
+        'consultationFee': widget.doctor.consultationFee.toDouble(), // Ensure it's double
+        'status': 'upcoming', // Changed from 'pending' to 'upcoming'
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
+
+      print('Creating appointment with data: $appointmentData');
+      print('Current user ID: ${user!.uid}');
 
       // Add appointment to Firestore
       DocumentReference appointmentRef = await _firestore
@@ -719,7 +724,6 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
       });
     }
   }
-
   Future<void> _updateUserProfile() async {
     if (user == null) return;
 

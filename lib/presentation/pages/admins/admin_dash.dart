@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mindcare/presentation/pages/admins/screens/appoiments_menagment.dart';
 import 'package:mindcare/presentation/pages/admins/screens/relax_music_upload.dart';
 import 'package:mindcare/presentation/pages/admins/screens/therapist_management_screen.dart';
 import 'package:mindcare/presentation/pages/admins/screens/user_manegment.dart';
@@ -293,6 +294,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   Icons.music_note,
                   Colors.purple,
                   () => _navigateTo(const RelaxMusicUploadScreen()),
+                  isTablet,
+                ),
+                _buildActionCard(
+                  'Appoiments',
+                  Icons.note,
+                  Colors.purple,
+                  () => _navigateTo(const AdminManageAppointments()),
                   isTablet,
                 ),
                 if (isTablet) ...[

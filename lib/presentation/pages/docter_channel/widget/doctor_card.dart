@@ -142,8 +142,8 @@ class DoctorCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (doctor.isOnline) _buildOnlineBadge(isMobile: isMobile),
-                  SizedBox(width: isMobile ? 4 : 8),
+                  // if (doctor.isOnline) _buildOnlineBadge(isMobile: isMobile),
+                  // SizedBox(width: isMobile ? 4 : 8),
                   IconButton(
                     onPressed: isInUserList ? onRemoveFromFavorites : onAddToFavorites,
                     icon: Icon(
@@ -204,32 +204,32 @@ class DoctorCard extends StatelessWidget {
       spacing: isMobile ? 8 : 12,
       runSpacing: 4,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.star,
-              size: isMobile ? 14 : 16,
-              color: Colors.amber,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '${doctor.rating}',
-              style: TextStyle(
-                fontSize: textSize,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '(${doctor.reviews} reviews)',
-              style: TextStyle(
-                fontSize: smallTextSize,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   mainAxisSize: MainAxisSize.min,
+        //   children: [
+        //     Icon(
+        //       Icons.star,
+        //       size: isMobile ? 14 : 16,
+        //       color: Colors.amber,
+        //     ),
+        //     const SizedBox(width: 4),
+        //     Text(
+        //       '${doctor.rating}',
+        //       style: TextStyle(
+        //         fontSize: textSize,
+        //         fontWeight: FontWeight.w500,
+        //       ),
+        //     ),
+        //     const SizedBox(width: 4),
+        //     Text(
+        //       '(${doctor.reviews} reviews)',
+        //       style: TextStyle(
+        //         fontSize: smallTextSize,
+        //         color: Colors.grey[600],
+        //       ),
+        //     ),
+        //   ],
+        // ),
         Text(
           '${doctor.experience} years exp.',
           style: TextStyle(
@@ -469,23 +469,7 @@ class DoctorCard extends StatelessWidget {
     // Mobile layout
     return Column(
       children: [
-        SizedBox(
-          width: double.infinity,
-          height: buttonHeight,
-          child: ElevatedButton.icon(
-            onPressed: () => _navigateToUserDetailsForm(context),
-            icon: Icon(Icons.video_call, size: iconSize),
-            label: Text(
-              'Channel Doctor',
-              style: TextStyle(fontSize: fontSize),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6A4C93),
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
+        
         Row(
           children: [
             Expanded(
@@ -509,10 +493,10 @@ class DoctorCard extends StatelessWidget {
               child: SizedBox(
                 height: buttonHeight,
                 child: ElevatedButton.icon(
-                  onPressed: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
-                  icon: Icon(Icons.phone, size: iconSize),
+                  onPressed: () => _navigateToUserDetailsForm(context),
+                  icon: Icon(Icons.bookmark_outline, size: iconSize),
                   label: Text(
-                    'Call',
+                    'Channel Doctor',
                     style: TextStyle(fontSize: fontSize),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -540,19 +524,19 @@ class DoctorCard extends StatelessWidget {
 
     
     // Option 2: Temporary placeholder until you set up the UserDetailsForm
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Channel Doctor'),
-        content: Text('Booking appointment with ${doctor.name}\n\nPlease create the UserDetailsForm widget and update the import statement.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => AlertDialog(
+    //     title: const Text('Channel Doctor'),
+    //     content: Text('Booking appointment with ${doctor.name}\n\nPlease create the UserDetailsForm widget and update the import statement.'),
+    //     actions: [
+    //       TextButton(
+    //         onPressed: () => Navigator.of(context).pop(),
+    //         child: const Text('OK'),
+    //       ),
+    //     ],
+    //   ),
+    // );
   }
 
   void _makePhoneCall(String phoneNumber) async {
