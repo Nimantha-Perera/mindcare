@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -21,6 +22,10 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
   String _statusMessage = '';
   
   late TabController _tabController;
+  
+  // Add these to track and cancel ongoing operations
+  List<StreamSubscription?> _uploadSubscriptions = [];
+  bool _disposed = false;
 
   @override
   void initState() {
@@ -31,12 +36,27 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
 
   @override
   void dispose() {
+    _disposed = true;
+    
+    // Cancel all upload subscriptions
+    for (final subscription in _uploadSubscriptions) {
+      subscription?.cancel();
+    }
+    _uploadSubscriptions.clear();
+    
     _tabController.dispose();
     super.dispose();
   }
 
+  // Safe setState wrapper
+  void _safeSetState(VoidCallback fn) {
+    if (!_disposed && mounted) {
+      setState(fn);
+    }
+  }
+
   Future<void> _loadUploadedSongs() async {
-    setState(() => _isLoadingSongs = true);
+    _safeSetState(() => _isLoadingSongs = true);
     
     try {
       final ListResult result = await FirebaseStorage.instance.ref('musics').listAll();
@@ -56,12 +76,12 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
       // Sort by upload time (newest first)
       songs.sort((a, b) => b.timeCreated.compareTo(a.timeCreated));
       
-      setState(() {
+      _safeSetState(() {
         _uploadedSongs = songs;
         _isLoadingSongs = false;
       });
     } catch (e) {
-      setState(() {
+      _safeSetState(() {
         _isLoadingSongs = false;
         _statusMessage = 'Error loading songs: ${e.toString()}';
       });
@@ -502,19 +522,23 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
         await context.read<MusicBloc>().loadMusicsFromFirebase();
       }
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Deleted "${_formatMusicName(song.name)}"'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Deleted "${_formatMusicName(song.name)}"'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error deleting song: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting song: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -526,21 +550,21 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
       );
 
       if (result != null && result.files.isNotEmpty) {
-        setState(() {
+        _safeSetState(() {
           _selectedFiles = result.files;
           _uploadProgress.clear();
           _statusMessage = '${result.files.length} file(s) selected';
         });
       }
     } catch (e) {
-      setState(() {
+      _safeSetState(() {
         _statusMessage = 'Error selecting files: ${e.toString()}';
       });
     }
   }
 
   void _clearFiles() {
-    setState(() {
+    _safeSetState(() {
       _selectedFiles.clear();
       _uploadProgress.clear();
       _statusMessage = '';
@@ -550,7 +574,13 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
   Future<void> _uploadFiles() async {
     if (_selectedFiles.isEmpty || _isUploading) return;
 
-    setState(() {
+    // Cancel any existing subscriptions
+    for (final subscription in _uploadSubscriptions) {
+      subscription?.cancel();
+    }
+    _uploadSubscriptions.clear();
+
+    _safeSetState(() {
       _isUploading = true;
       _uploadProgress = _selectedFiles.map((f) => UploadProgress()).toList();
       _statusMessage = 'Starting upload...';
@@ -560,26 +590,32 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
     int errorCount = 0;
 
     for (int i = 0; i < _selectedFiles.length; i++) {
+      if (_disposed) break; // Stop if disposed
+      
       final file = _selectedFiles[i];
       
       try {
         if (file.path != null) {
           await _uploadSingleFile(File(file.path!), file.name, i);
           successCount++;
-          setState(() {
-            _uploadProgress[i].isComplete = true;
+          _safeSetState(() {
+            if (i < _uploadProgress.length) {
+              _uploadProgress[i].isComplete = true;
+            }
           });
         }
       } catch (e) {
         errorCount++;
-        setState(() {
-          _uploadProgress[i].hasError = true;
+        _safeSetState(() {
+          if (i < _uploadProgress.length) {
+            _uploadProgress[i].hasError = true;
+          }
         });
         print('Error uploading ${file.name}: $e');
       }
     }
 
-    setState(() {
+    _safeSetState(() {
       _isUploading = false;
       _statusMessage = 'Upload complete: $successCount successful, $errorCount failed';
     });
@@ -589,7 +625,7 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
       try {
         await context.read<MusicBloc>().loadMusicsFromFirebase();
         await _loadUploadedSongs();
-        setState(() {
+        _safeSetState(() {
           _statusMessage += '\nMusic library updated successfully!';
         });
       } catch (e) {
@@ -607,19 +643,34 @@ class _RelaxMusicUploadScreenState extends State<RelaxMusicUploadScreen> with Si
     final storageRef = FirebaseStorage.instance.ref().child('musics/$fileName');
     final uploadTask = storageRef.putFile(file);
     
-    uploadTask.snapshotEvents.listen((snapshot) {
+    // Store subscription to cancel it later if needed
+    final subscription = uploadTask.snapshotEvents.listen((snapshot) {
       final progress = snapshot.bytesTransferred / snapshot.totalBytes;
-      if (mounted) {
-        setState(() {
+      _safeSetState(() {
+        if (index < _uploadProgress.length) {
           _uploadProgress[index].progress = progress;
-        });
-      }
+        }
+      });
     });
+    
+    // Add to our list of subscriptions
+    if (index < _uploadSubscriptions.length) {
+      _uploadSubscriptions[index] = subscription;
+    } else {
+      _uploadSubscriptions.add(subscription);
+    }
 
-    await uploadTask;
+    try {
+      await uploadTask;
+    } finally {
+      // Clean up subscription
+      subscription.cancel();
+    }
   }
 
   void _showCompletionDialog(int successCount, int errorCount) {
+    if (!mounted) return;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
