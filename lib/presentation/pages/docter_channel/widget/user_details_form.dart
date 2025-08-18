@@ -751,91 +751,225 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
   }
 
   void _showSuccessDialog(String appointmentId) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 24,
-                ),
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          // Determine if we're on a small screen
+          bool isSmallScreen = constraints.maxWidth < 600;
+          double dialogWidth = isSmallScreen 
+              ? constraints.maxWidth * 0.9 
+              : constraints.maxWidth * 0.4;
+          
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              width: dialogWidth,
+              constraints: BoxConstraints(
+                maxWidth: 500,
+                maxHeight: constraints.maxHeight * 0.8,
               ),
-              const SizedBox(width: 16),
-              const Text('Appointment Booked!'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Your appointment has been successfully booked.'),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Appointment ID: ${appointmentId.substring(0, 8)}...'),
-                    Text('Doctor: ${widget.doctor.name}'),
-                    Text('Date: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'),
-                    Text('Time: ${_selectedTime!.format(context)}'),
-                    Text('Fee: LKR ${_formatCurrency(widget.doctor.consultationFee)}'),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        'Status: Pending Confirmation',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title Section
+                      Flexible(
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: isSmallScreen ? 20 : 24,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                'Appointment Booked!',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontSize: isSmallScreen ? 18 : 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                      
+                      SizedBox(height: isSmallScreen ? 16 : 20),
+                      
+                      // Success message
+                      Text(
+                        'Your appointment has been successfully booked.',
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 14 : 16,
+                        ),
+                      ),
+                      
+                      SizedBox(height: isSmallScreen ? 16 : 20),
+                      
+                      // Appointment Details Container
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDetailRow(
+                              'Appointment ID',
+                              '${appointmentId.substring(0, 8)}...',
+                              isSmallScreen,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDetailRow(
+                              'Doctor',
+                              widget.doctor.name,
+                              isSmallScreen,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDetailRow(
+                              'Date',
+                              '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                              isSmallScreen,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDetailRow(
+                              'Time',
+                              _selectedTime!.format(context),
+                              isSmallScreen,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDetailRow(
+                              'Fee',
+                              'LKR ${_formatCurrency(widget.doctor.consultationFee)}',
+                              isSmallScreen,
+                            ),
+                            
+                            SizedBox(height: isSmallScreen ? 12 : 16),
+                            
+                            // Status Badge
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isSmallScreen ? 8 : 12,
+                                  vertical: isSmallScreen ? 6 : 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'Status: Pending Confirmation',
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 11 : 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange[700],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      SizedBox(height: isSmallScreen ? 16 : 20),
+                      
+                      // Information text
+                      Text(
+                        'You will receive a confirmation call/SMS shortly. You can view your appointments in your profile.',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: isSmallScreen ? 13 : 14,
+                          height: 1.4,
+                        ),
+                      ),
+                      
+                      SizedBox(height: isSmallScreen ? 20 : 24),
+                      
+                      // Action Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close dialog
+                            Navigator.of(context).pop(); // Go back to previous screen
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              vertical: isSmallScreen ? 12 : 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'OK',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 16 : 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'You will receive a confirmation call/SMS shortly. You can view your appointments in your profile.',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(); // Go back to previous screen
-              },
-              child: const Text('OK'),
             ),
-          ],
-        );
-      },
-    );
-  }
+          );
+        },
+      );
+    },
+  );
+}
+
+// Helper method for building detail rows
+Widget _buildDetailRow(String label, String value, bool isSmallScreen) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        width: isSmallScreen ? 80 : 100,
+        child: Text(
+          '$label:',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: isSmallScreen ? 13 : 14,
+            color: Colors.grey[700],
+          ),
+        ),
+      ),
+      Expanded(
+        child: Text(
+          value,
+          style: TextStyle(
+            fontSize: isSmallScreen ? 13 : 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    ],
+  );
+}
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
