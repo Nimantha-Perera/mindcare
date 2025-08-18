@@ -68,7 +68,7 @@ class _AdminManageAppointmentsState extends State<AdminManageAppointments>
       appBar: AppBar(
         title: const Text(
           'Manage Appointments',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15),
         ),
         backgroundColor: const Color(0xFF6A4C93),
         foregroundColor: Colors.white,
