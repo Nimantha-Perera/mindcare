@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mindcare/domain/entities/doctor.dart';
+import 'package:mindcare/presentation/pages/docter_channel/widget/user_details_form.dart';
 
 class DoctorDetailsModal extends StatelessWidget {
   final Doctor doctor;
@@ -22,7 +23,7 @@ class DoctorDetailsModal extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width > 600;
     final isLandscape = screenSize.width > screenSize.height;
-    
+
     return DraggableScrollableSheet(
       initialChildSize: isLandscape ? 0.8 : 0.7,
       maxChildSize: isLandscape ? 0.95 : 0.9,
@@ -71,7 +72,7 @@ class DoctorDetailsModal extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width > 600;
     final isSmallScreen = screenSize.width < 400;
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 500) {
@@ -102,7 +103,7 @@ class DoctorDetailsModal extends StatelessWidget {
     return CircleAvatar(
       radius: radius,
       backgroundColor: Colors.grey[300],
-      backgroundImage: doctor.profileImage.isNotEmpty 
+      backgroundImage: doctor.profileImage.isNotEmpty
           ? NetworkImage(doctor.profileImage)
           : null,
       child: doctor.profileImage.isEmpty
@@ -118,7 +119,7 @@ class DoctorDetailsModal extends StatelessWidget {
   Widget _buildDoctorInfo(BuildContext context, bool isTablet) {
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.width < 400;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -140,8 +141,8 @@ class DoctorDetailsModal extends StatelessWidget {
         Row(
           children: [
             Icon(
-              Icons.star, 
-              size: isTablet ? 24 : (isSmallScreen ? 16 : 20), 
+              Icons.star,
+              size: isTablet ? 24 : (isSmallScreen ? 16 : 20),
               color: Colors.amber,
             ),
             const SizedBox(width: 4),
@@ -153,27 +154,27 @@ class DoctorDetailsModal extends StatelessWidget {
             ),
           ],
         ),
-        if (doctor.isOnline) ...[
-          SizedBox(height: isTablet ? 12 : 8),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: isTablet ? 16 : 12,
-              vertical: isTablet ? 8 : 6,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.green,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              'Online Now',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: isTablet ? 14 : (isSmallScreen ? 10 : 12),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
+        // if (doctor.isOnline) ...[
+        //   SizedBox(height: isTablet ? 12 : 8),
+        //   Container(
+        //     padding: EdgeInsets.symmetric(
+        //       horizontal: isTablet ? 16 : 12,
+        //       vertical: isTablet ? 8 : 6,
+        //     ),
+        //     decoration: BoxDecoration(
+        //       color: Colors.green,
+        //       borderRadius: BorderRadius.circular(12),
+        //     ),
+        //     child: Text(
+        //       'Online Now',
+        //       style: TextStyle(
+        //         color: Colors.white,
+        //         fontSize: isTablet ? 14 : (isSmallScreen ? 10 : 12),
+        //         fontWeight: FontWeight.w500,
+        //       ),
+        //     ),
+        //   ),
+        // ],
       ],
     );
   }
@@ -182,7 +183,7 @@ class DoctorDetailsModal extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width > 600;
     final isSmallScreen = screenSize.width < 400;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -210,7 +211,7 @@ class DoctorDetailsModal extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width > 600;
     final isSmallScreen = screenSize.width < 400;
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 300) {
@@ -258,11 +259,12 @@ class DoctorDetailsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(String title, String value, IconData icon, BuildContext context) {
+  Widget _buildInfoCard(
+      String title, String value, IconData icon, BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width > 600;
     final isSmallScreen = screenSize.width < 400;
-    
+
     return Container(
       padding: EdgeInsets.all(isTablet ? 20 : (isSmallScreen ? 12 : 16)),
       decoration: BoxDecoration(
@@ -273,8 +275,8 @@ class DoctorDetailsModal extends StatelessWidget {
       child: Column(
         children: [
           Icon(
-            icon, 
-            color: const Color(0xFF6A4C93), 
+            icon,
+            color: const Color(0xFF6A4C93),
             size: isTablet ? 32 : (isSmallScreen ? 24 : 28),
           ),
           SizedBox(height: isTablet ? 12 : 8),
@@ -304,7 +306,7 @@ class DoctorDetailsModal extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width > 600;
     final isSmallScreen = screenSize.width < 400;
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 300) {
@@ -339,7 +341,8 @@ class DoctorDetailsModal extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: isInUserList ? onRemoveFromFavorites : onAddToFavorites,
+                  onPressed:
+                      isInUserList ? onRemoveFromFavorites : onAddToFavorites,
                   icon: Icon(
                     isInUserList ? Icons.favorite : Icons.favorite_border,
                     size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
@@ -351,7 +354,8 @@ class DoctorDetailsModal extends StatelessWidget {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isInUserList ? Colors.red : const Color(0xFF6A4C93),
+                    backgroundColor:
+                        isInUserList ? Colors.red : const Color(0xFF6A4C93),
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(
                       vertical: isTablet ? 16 : (isSmallScreen ? 10 : 12),
@@ -367,15 +371,14 @@ class DoctorDetailsModal extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    Navigator.pop(context);
-                    onCall();
+                    _navigateToUserDetailsForm(context);
                   },
                   icon: Icon(
-                    Icons.phone,
+                    Icons.bookmark,
                     size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
                   ),
                   label: Text(
-                    'Call Doctor',
+                    'Channel',
                     style: TextStyle(
                       fontSize: isTablet ? 16 : (isSmallScreen ? 12 : 15),
                     ),
@@ -391,7 +394,8 @@ class DoctorDetailsModal extends StatelessWidget {
               SizedBox(width: isTablet ? 16 : 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: isInUserList ? onRemoveFromFavorites : onAddToFavorites,
+                  onPressed:
+                      isInUserList ? onRemoveFromFavorites : onAddToFavorites,
                   icon: Icon(
                     isInUserList ? Icons.favorite : Icons.favorite_border,
                     size: isTablet ? 20 : (isSmallScreen ? 16 : 18),
@@ -403,7 +407,8 @@ class DoctorDetailsModal extends StatelessWidget {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isInUserList ? Colors.red : const Color(0xFF6A4C93),
+                    backgroundColor:
+                        isInUserList ? Colors.red : const Color(0xFF6A4C93),
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(
                       vertical: isTablet ? 16 : (isSmallScreen ? 10 : 12),
@@ -415,6 +420,15 @@ class DoctorDetailsModal extends StatelessWidget {
           );
         }
       },
+    );
+  }
+
+  void _navigateToUserDetailsForm(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserDetailsForm(doctor: doctor),
+      ),
     );
   }
 }

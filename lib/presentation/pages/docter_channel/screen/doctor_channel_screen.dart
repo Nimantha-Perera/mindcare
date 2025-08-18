@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mindcare/domain/entities/doctor.dart';
 import 'package:mindcare/presentation/cubit/doctor_cubit.dart';
+import 'package:mindcare/presentation/pages/docter_channel/widget/appoiment_section.dart';
 import 'package:mindcare/presentation/pages/docter_channel/widget/doctor_card.dart';
 import 'package:mindcare/presentation/pages/docter_channel/widget/empty_state.dart';
 import 'package:mindcare/presentation/pages/docter_channel/widget/filter_section.dart';
@@ -33,11 +34,9 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    
-   
+    _tabController = TabController(length: 3, vsync: this);
+
     context.read<DoctorCubit>().loadDoctors();
-    
 
     _searchController.addListener(_onSearchChanged);
   }
@@ -75,12 +74,12 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
 
   List<Doctor> _filterDoctorsBySearch(List<Doctor> doctors) {
     if (_searchQuery.isEmpty) return doctors;
-    
+
     final query = _searchQuery.toLowerCase();
     return doctors.where((doctor) {
       return doctor.name.toLowerCase().contains(query) ||
-             doctor.specialty.toLowerCase().contains(query) ||
-             (doctor.about.toLowerCase().contains(query));
+          doctor.specialty.toLowerCase().contains(query) ||
+          (doctor.about.toLowerCase().contains(query));
     }).toList();
   }
 
@@ -94,6 +93,7 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
         children: [
           _buildFindDoctorsTab(),
           _buildMyDoctorsTab(),
+          AppointmentSections()
         ],
       ),
     );
@@ -101,26 +101,33 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: _isSearching ? _buildSearchField() : const Text(
-        'Doctors',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
+      title: _isSearching
+          ? _buildSearchField()
+          : const Text(
+              'Doctors',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
       backgroundColor: const Color(0xFF6A4C93),
       elevation: 0,
       actions: _buildAppBarActions(),
-      bottom: _isSearching ? null : TabBar(
-        controller: _tabController,
-        indicatorColor: Colors.white,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white70,
-        tabs: const [
-          Tab(text: 'Find Doctors'),
-          Tab(text: 'My Doctors'),
-        ],
-      ),
+      bottom: _isSearching
+          ? null
+          : TabBar(
+              controller: _tabController,
+              indicatorColor: Colors.white,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              tabs: const [
+                Tab(text: 'Find Doctors'),
+                Tab(text: 'My Doctors'),
+                Tab(
+                  text: 'My Appoiments',
+                )
+              ],
+            ),
     );
   }
 
@@ -163,12 +170,18 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
         icon: const Icon(Icons.search, color: Colors.white),
         onPressed: _toggleSearch,
       ),
-      IconButton(
-        icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-        onPressed: () {
-          // TODO: Implement notifications
-        },
-      ),
+      // IconButton(
+      //   icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+      //   onPressed: () {
+      //     // TODO: Implement notifications
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) => const AppointmentSections(),
+      //       ),
+      //     );
+      //   },
+      // ),
     ];
   }
 
@@ -187,24 +200,26 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
       builder: (context, state) {
         return Column(
           children: [
-           
             if (_isSearching && _searchQuery.isNotEmpty)
               _buildSearchResultsHeader(),
-            
-            
             if (!_isSearching)
               FilterSection(
                 specialties: _specialties,
-                selectedSpecialty: state is DoctorLoaded ? state.selectedSpecialty : 'All',
-                isOnlineOnly: state is DoctorLoaded ? state.isOnlineOnly : false,
+                selectedSpecialty:
+                    state is DoctorLoaded ? state.selectedSpecialty : 'All',
+                isOnlineOnly:
+                    state is DoctorLoaded ? state.isOnlineOnly : false,
                 onSpecialtyChanged: (specialty) {
-                  context.read<DoctorCubit>().filterDoctors(specialty: specialty);
+                  context
+                      .read<DoctorCubit>()
+                      .filterDoctors(specialty: specialty);
                 },
                 onOnlineFilterChanged: (isOnlineOnly) {
-                  context.read<DoctorCubit>().filterDoctors(isOnlineOnly: isOnlineOnly);
+                  context
+                      .read<DoctorCubit>()
+                      .filterDoctors(isOnlineOnly: isOnlineOnly);
                 },
               ),
-            
             Expanded(
               child: _buildDoctorsList(state),
             ),
@@ -236,32 +251,31 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
         if (state is DoctorLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         if (state is DoctorLoaded) {
-      
           final filteredDoctors = _filterDoctorsBySearch(state.userDoctors);
-          
+
           if (state.userDoctors.isEmpty) {
             return const EmptyState(
               message: 'No saved doctors yet',
               subtitle: 'Add doctors to your list from the Find Doctors tab',
             );
           }
-          
+
           if (filteredDoctors.isEmpty && _searchQuery.isNotEmpty) {
             return EmptyState(
               message: 'No doctors found',
               subtitle: 'No saved doctors match "$_searchQuery"',
             );
           }
-          
+
           return Column(
             children: [
-          
               if (_searchQuery.isNotEmpty)
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   color: Colors.grey[100],
                   child: Text(
                     '${filteredDoctors.length} of ${state.userDoctors.length} doctors found',
@@ -272,7 +286,6 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
                     ),
                   ),
                 ),
-              
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16.0),
@@ -281,8 +294,10 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
                     return DoctorCard(
                       doctor: filteredDoctors[index],
                       isInUserList: true,
-                      onAddToFavorites: () => _addToFavorites(filteredDoctors[index]),
-                      onRemoveFromFavorites: () => _removeFromFavorites(filteredDoctors[index]),
+                      onAddToFavorites: () =>
+                          _addToFavorites(filteredDoctors[index]),
+                      onRemoveFromFavorites: () =>
+                          _removeFromFavorites(filteredDoctors[index]),
                     );
                   },
                 ),
@@ -290,7 +305,7 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
             ],
           );
         }
-        
+
         return const EmptyState(
           message: 'Something went wrong',
           subtitle: 'Please try again later',
@@ -311,14 +326,14 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
     if (state is DoctorLoaded) {
       // Apply search filter to all doctors
       final filteredDoctors = _filterDoctorsBySearch(state.doctors);
-      
+
       if (state.doctors.isEmpty) {
         return const EmptyState(
           message: 'No doctors found',
           subtitle: 'Try adjusting your filters',
         );
       }
-      
+
       if (filteredDoctors.isEmpty && _searchQuery.isNotEmpty) {
         return EmptyState(
           message: 'No doctors found',
@@ -329,9 +344,9 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
       return RefreshIndicator(
         onRefresh: () async {
           context.read<DoctorCubit>().loadDoctors(
-            specialty: state.selectedSpecialty,
-            isOnlineOnly: state.isOnlineOnly,
-          );
+                specialty: state.selectedSpecialty,
+                isOnlineOnly: state.isOnlineOnly,
+              );
         },
         child: Column(
           children: [
@@ -339,7 +354,8 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
             if (_searchQuery.isNotEmpty)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Text(
                   '${filteredDoctors.length} doctors found',
                   style: TextStyle(
@@ -349,15 +365,16 @@ class _DoctorChannelScreenState extends State<DoctorChannelScreen>
                   ),
                 ),
               ),
-            
+
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: filteredDoctors.length,
                 itemBuilder: (context, index) {
                   final doctor = filteredDoctors[index];
-                  final isInUserList = state.userDoctors.any((d) => d.id == doctor.id);
-                  
+                  final isInUserList =
+                      state.userDoctors.any((d) => d.id == doctor.id);
+
                   return DoctorCard(
                     doctor: doctor,
                     isInUserList: isInUserList,

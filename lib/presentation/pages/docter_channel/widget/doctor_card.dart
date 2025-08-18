@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mindcare/presentation/pages/docter_channel/widget/user_details_form.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mindcare/domain/entities/doctor.dart';
 import 'package:mindcare/presentation/pages/docter_channel/widget/doctor_detail_modal.dart';
+// Import your UserDetailsForm here - adjust the path according to your project structure
+// import 'package:mindcare/presentation/pages/docter_channel/pages/user_details_form.dart';
 
 class DoctorCard extends StatelessWidget {
   final Doctor doctor;
@@ -17,7 +20,6 @@ class DoctorCard extends StatelessWidget {
     required this.onAddToFavorites,
     required this.onRemoveFromFavorites,
   }) : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
@@ -41,28 +43,28 @@ class DoctorCard extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
           child: isMobile
-              ? _buildMobileLayout()
+              ? _buildMobileLayout(context)
               : isTablet
-                  ? _buildTabletLayout()
-                  : _buildDesktopLayout(),
+                  ? _buildTabletLayout(context)
+                  : _buildDesktopLayout(context),
         ),
       ),
     );
   }
 
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(BuildContext context) {
     return Column(
       children: [
         _buildDoctorHeader(isMobile: true),
         const SizedBox(height: 12),
         _buildDoctorInfo(isMobile: true),
         const SizedBox(height: 12),
-        _buildActionButtons(isMobile: true),
+        _buildActionButtons(context, isMobile: true),
       ],
     );
   }
 
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(BuildContext context) {
     return Column(
       children: [
         _buildDoctorHeader(isTablet: true),
@@ -73,7 +75,7 @@ class DoctorCard extends StatelessWidget {
             const SizedBox(width: 16),
             SizedBox(
               width: 200,
-              child: _buildActionButtons(isTablet: true),
+              child: _buildActionButtons(context, isTablet: true),
             ),
           ],
         ),
@@ -81,7 +83,7 @@ class DoctorCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopLayout() {
+  Widget _buildDesktopLayout(BuildContext context) {
     return Row(
       children: [
         Expanded(
@@ -97,7 +99,7 @@ class DoctorCard extends StatelessWidget {
         const SizedBox(width: 24),
         Expanded(
           flex: 1,
-          child: _buildActionButtons(isDesktop: true),
+          child: _buildActionButtons(context, isDesktop: true),
         ),
       ],
     );
@@ -173,36 +175,42 @@ class DoctorCard extends StatelessWidget {
     );
   }
 
-  Widget _buildOnlineBadge({bool isMobile = false}) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 6 : 8,
-        vertical: isMobile ? 2 : 4,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.green,
-        borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
-      ),
-      child: Text(
-        'Online',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: isMobile ? 10 : 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
+  
 
   Widget _buildRatingAndExperience({bool isMobile = false}) {
     final textSize = isMobile ? 12.0 : 14.0;
     final smallTextSize = isMobile ? 10.0 : 12.0;
 
     return Wrap(
-      // spacing: isMobile ? 8 : 12,
-      // runSpacing: 4,
+      spacing: isMobile ? 8 : 12,
+      runSpacing: 4,
       children: [
-        
+        // Row(
+        //   mainAxisSize: MainAxisSize.min,
+        //   children: [
+        //     Icon(
+        //       Icons.star,
+        //       size: isMobile ? 14 : 16,
+        //       color: Colors.amber,
+        //     ),
+        //     const SizedBox(width: 4),
+        //     Text(
+        //       '${doctor.rating}',
+        //       style: TextStyle(
+        //         fontSize: textSize,
+        //         fontWeight: FontWeight.w500,
+        //       ),
+        //     ),
+        //     const SizedBox(width: 4),
+        //     Text(
+        //       '(${doctor.reviews} reviews)',
+        //       style: TextStyle(
+        //         fontSize: smallTextSize,
+        //         color: Colors.grey[600],
+        //       ),
+        //     ),
+        //   ],
+        // ),
         Text(
           '${doctor.experience} years exp.',
           style: TextStyle(
@@ -232,10 +240,10 @@ class DoctorCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       'Consultation Fee',
@@ -265,53 +273,54 @@ class DoctorCard extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.all(isMobile ? 8 : 12),
-            decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mobile Number',
-                      style: TextStyle(
-                        fontSize: labelSize,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      doctor.mobileNumber ?? '+94 71 234 5678',
-                      style: TextStyle(
-                        fontSize: valueSize,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green[700],
-                      ),
-                    ),
-                  ],
-                ),
-                if (!isMobile)
-                  Icon(
-                    Icons.phone,
-                    color: Colors.green[700],
-                    size: isDesktop ? 24 : 20,
-                  ),
-              ],
-            ),
-          ),
-        ),
+
+        // Expanded(
+        //   child: Container(
+        //     padding: EdgeInsets.all(isMobile ? 8 : 12),
+        //     decoration: BoxDecoration(
+        //       color: Colors.green.withOpacity(0.1),
+        //       borderRadius: BorderRadius.circular(8),
+        //     ),
+        //     child: Row(
+        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //       children: [
+        //         Column(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             Text(
+        //               'Mobile Number',
+        //               style: TextStyle(
+        //                 fontSize: labelSize,
+        //                 color: Colors.grey[600],
+        //               ),
+        //             ),
+        //             const SizedBox(height: 2),
+        //             Text(
+        //               doctor.mobileNumber ?? '+94 71 234 5678',
+        //               style: TextStyle(
+        //                 fontSize: valueSize,
+        //                 fontWeight: FontWeight.bold,
+        //                 color: Colors.green[700],
+        //               ),
+        //             ),
+        //           ],
+        //         ),
+        //         if (!isMobile)
+        //           Icon(
+        //             Icons.phone,
+        //             color: Colors.green[700],
+        //             size: isDesktop ? 24 : 20,
+        //           ),
+        //       ],
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
 
-  Widget _buildActionButtons({
+  Widget _buildActionButtons(
+    BuildContext context, {
     bool isMobile = false,
     bool isTablet = false,
     bool isDesktop = false,
@@ -327,76 +336,188 @@ class DoctorCard extends StatelessWidget {
             width: double.infinity,
             height: buttonHeight,
             child: ElevatedButton.icon(
-              onPressed: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
-              icon: Icon(Icons.phone, size: iconSize),
+              onPressed: () => _navigateToUserDetailsForm(context),
+              icon: Icon(Icons.video_call, size: iconSize),
               label: Text(
-                'Call Doctor',
+                'Channel Doctor',
                 style: TextStyle(fontSize: fontSize),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: const Color(0xFF6A4C93),
                 foregroundColor: Colors.white,
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            height: buttonHeight,
-            child: OutlinedButton.icon(
-              onPressed: () => _copyNumberToClipboard(doctor.mobileNumber ?? '+94712345678'),
-              icon: Icon(Icons.content_copy, size: iconSize),
-              label: Text(
-                'Get Number',
-                style: TextStyle(fontSize: fontSize),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF6A4C93),
-              ),
-            ),
-          ),
+          // const SizedBox(height: 8),
+          // SizedBox(
+          //   width: double.infinity,
+          //   height: buttonHeight,
+          //   child: ElevatedButton.icon(
+          //     onPressed: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
+          //     icon: Icon(Icons.phone, size: iconSize),
+          //     label: Text(
+          //       'Call Doctor',
+          //       style: TextStyle(fontSize: fontSize),
+          //     ),
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: Colors.green,
+          //       foregroundColor: Colors.white,
+          //     ),
+          //   ),
+          // ),
+          // const SizedBox(height: 8),
+          // SizedBox(
+          //   width: double.infinity,
+          //   height: buttonHeight,
+          //   child: OutlinedButton.icon(
+          //     onPressed: () => _copyNumberToClipboard(doctor.mobileNumber ?? '+94712345678'),
+          //     icon: Icon(Icons.content_copy, size: iconSize),
+          //     label: Text(
+          //       'Get Number',
+          //       style: TextStyle(fontSize: fontSize),
+          //     ),
+          //     style: OutlinedButton.styleFrom(
+          //       foregroundColor: const Color(0xFF6A4C93),
+          //     ),
+          //   ),
+          // ),
         ],
       );
     }
 
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: buttonHeight,
-            child: OutlinedButton.icon(
-              onPressed: () => _copyNumberToClipboard(doctor.mobileNumber ?? '+94712345678'),
-              icon: Icon(Icons.content_copy, size: iconSize),
-              label: Text(
-                'Get Number',
-                style: TextStyle(fontSize: fontSize),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF6A4C93),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: SizedBox(
+    if (isTablet) {
+      return Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
             height: buttonHeight,
             child: ElevatedButton.icon(
-              onPressed: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
-              icon: Icon(Icons.phone, size: iconSize),
+              onPressed: () => _navigateToUserDetailsForm(context),
+              icon: Icon(Icons.video_call, size: iconSize),
               label: Text(
-                'Call',
+                'Channel Doctor',
                 style: TextStyle(fontSize: fontSize),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: const Color(0xFF6A4C93),
                 foregroundColor: Colors.white,
               ),
             ),
           ),
+          // const SizedBox(height: 8),
+          // Row(
+          //   children: [
+          //     Expanded(
+          //       child: SizedBox(
+          //         height: buttonHeight,
+          //         child: OutlinedButton.icon(
+          //           onPressed: () => _copyNumberToClipboard(doctor.mobileNumber ?? '+94712345678'),
+          //           icon: Icon(Icons.content_copy, size: iconSize),
+          //           label: Text(
+          //             'Get Number',
+          //             style: TextStyle(fontSize: fontSize),
+          //           ),
+          //           style: OutlinedButton.styleFrom(
+          //             foregroundColor: const Color(0xFF6A4C93),
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //     const SizedBox(width: 8),
+          //     Expanded(
+          //       child: SizedBox(
+          //         height: buttonHeight,
+          //         child: ElevatedButton.icon(
+          //           onPressed: () => _makePhoneCall(doctor.mobileNumber ?? '+94712345678'),
+          //           icon: Icon(Icons.phone, size: iconSize),
+          //           label: Text(
+          //             'Call',
+          //             style: TextStyle(fontSize: fontSize),
+          //           ),
+          //           style: ElevatedButton.styleFrom(
+          //             backgroundColor: Colors.green,
+          //             foregroundColor: Colors.white,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+        ],
+      );
+    }
+
+    // Mobile layout
+    return Column(
+      children: [
+        
+        Row(
+          children: [
+            // Expanded(
+            //   child: SizedBox(
+            //     height: buttonHeight,
+            //     child: OutlinedButton.icon(
+            //       onPressed: () => _copyNumberToClipboard(doctor.mobileNumber ?? '+94712345678'),
+            //       icon: Icon(Icons.content_copy, size: iconSize),
+            //       label: Text(
+            //         'Get Number',
+            //         style: TextStyle(fontSize: fontSize),
+            //       ),
+            //       style: OutlinedButton.styleFrom(
+            //         foregroundColor: const Color(0xFF6A4C93),
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(width: 8),
+            Expanded(
+              child: SizedBox(
+                height: buttonHeight,
+                child: ElevatedButton.icon(
+                  onPressed: () => _navigateToUserDetailsForm(context),
+                  icon: Icon(Icons.bookmark_outline, size: iconSize),
+                  label: Text(
+                    'Channel Doctor',
+                    style: TextStyle(fontSize: fontSize),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
+  }
+
+  void _navigateToUserDetailsForm(BuildContext context) {
+    // Option 1: If you have the UserDetailsForm available, use this:
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserDetailsForm(doctor: doctor),
+      ),
+    );
+
+    
+    // Option 2: Temporary placeholder until you set up the UserDetailsForm
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => AlertDialog(
+    //     title: const Text('Channel Doctor'),
+    //     content: Text('Booking appointment with ${doctor.name}\n\nPlease create the UserDetailsForm widget and update the import statement.'),
+    //     actions: [
+    //       TextButton(
+    //         onPressed: () => Navigator.of(context).pop(),
+    //         child: const Text('OK'),
+    //       ),
+    //     ],
+    //   ),
+    // );
   }
 
   void _makePhoneCall(String phoneNumber) async {
@@ -431,11 +552,6 @@ class DoctorCard extends StatelessWidget {
       ),
     );
   }
-
-  // NetworkImage _getDummyImage() {
-  //   final imageIndex = doctor.name.hashCode.abs() % _dummyImages.length;
-  //   return NetworkImage(_dummyImages[imageIndex]);
-  // }
 
   String _formatAvailability(DateTime dateTime) {
     final now = DateTime.now();
