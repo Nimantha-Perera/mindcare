@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart'; // Add this import
 import 'package:mindcare/presentation/pages/admins/screens/appoiments_menagment.dart';
 import 'package:mindcare/presentation/pages/admins/screens/relax_music_upload.dart';
 import 'package:mindcare/presentation/pages/admins/screens/therapist_management_screen.dart';
@@ -58,14 +59,27 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> _loadCounts() async {
     try {
+      // Load users and doctors count
       final usersSnap = await FirebaseFirestore.instance.collection('users').get();
       final doctorsSnap = await FirebaseFirestore.instance.collection('doctors').get();
       
-      setState(() {
-        _userCount = usersSnap.docs.length;
-        _doctorCount = doctorsSnap.docs.length;
-        _musicCount = 0;
-      });
+      // Load music count from Firebase Storage
+      int musicCount = 0;
+      try {
+        final ListResult musicResult = await FirebaseStorage.instance.ref('musics').listAll();
+        musicCount = musicResult.items.length;
+      } catch (e) {
+        print('Error loading music count: $e');
+        // Keep musicCount as 0 if there's an error
+      }
+      
+      if (mounted) {
+        setState(() {
+          _userCount = usersSnap.docs.length;
+          _doctorCount = doctorsSnap.docs.length;
+          _musicCount = musicCount;
+        });
+      }
     } catch (e) {
       print('Error fetching counts: $e');
     }
@@ -450,6 +464,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context, 
       MaterialPageRoute(builder: (_) => screen)
     ).then((_) {
+      // Refresh counts when returning from any screen
       _loadCounts();
     });
   }
@@ -544,6 +559,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ),
                 const SizedBox(width: 8),
               ],
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: _loadCounts,
+                tooltip: 'Refresh Data',
+              ),
               IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: _handleLogout,
